@@ -7,6 +7,10 @@ from src.otemposp.editorial import summarise
 
 def produce(snapshot, when):
     brief=summarise(json.loads(Path(snapshot).read_text()),when)
+    return render_brief(brief, "output/bira.mp4" if when=="hoje" else "output/bia.mp4")
+
+def render_brief(brief, destination):
+    when=brief["when"]
     out=Path("output")
     out.mkdir(exist_ok=True)
     (out/"brief.json").write_text(json.dumps(brief,ensure_ascii=False))
@@ -17,7 +21,9 @@ def produce(snapshot, when):
     subprocess.run([sys.executable,"-m","manim","-r","1080,1920","--fps","24","--disable_caching","scripts/boletim.py","Boletim"],check=True)
     import shutil
     [result]=Path("media/videos/boletim").glob("*/Boletim.mp4")
-    shutil.copyfile(result,out/("bira.mp4" if when=="hoje" else "bia.mp4"))
+    Path(destination).parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(result,destination)
+    return destination
 
 if __name__=="__main__":
     produce(*sys.argv[1:])

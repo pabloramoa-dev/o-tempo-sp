@@ -5,8 +5,7 @@ from pathlib import Path
 from .geo import validate
 from .weather import collect
 from .editorial import summarise
-from .render import render
-from .voice import generate
+from scripts.produce import render_brief
 from .publish import publish
 
 
@@ -37,7 +36,6 @@ def main():
     v.add_argument('brief')
     v.add_argument('--out',default='output/reel.mp4')
     v.add_argument('--demo',action='store_true')
-    v.add_argument('--audio',default='output/voice.wav')
     pub = sub.add_parser('publish')
     pub.add_argument('snapshot')
     pub.add_argument('brief')
@@ -54,15 +52,9 @@ def main():
         Path(args.out).with_suffix('.txt').write_text(result['caption'],encoding='utf-8')
     elif args.cmd == 'render':
         brief=load(args.brief)
-        if args.demo:
-            if not brief.get('is_fixture'):
-                raise SystemExit('--demo somente para briefing fictício')
-            audio=None
-        else:
-            if brief.get('is_fixture'):
-                raise SystemExit('Dado fictício não pode gerar vídeo de publicação')
-            audio=generate(brief['script'],args.audio)
-        print(render(brief,args.out,audio=audio,demo=args.demo))
+        if bool(brief.get('is_fixture')) != args.demo:
+            raise SystemExit('Use --demo para dados simulados.')
+        print(render_brief(brief, args.out))
     elif args.cmd == 'publish':
         print('Publicado media_id:',publish(load(args.snapshot),load(args.brief),args.video_url))
 

@@ -15,9 +15,8 @@ format:
   safe_bottom: 360
   safe_side: 90
 presenter:
-  name: 'Bira e Bia'
-  voice: 'pm_alex'
-  voice_speed: 0.94
+  morning: {name: Bira, voice: pm_alex, speed: 1.04}
+  evening: {name: Bia, voice: pf_dora, speed: 1.02}
 publication:
   enabled: false
   require_verified_account: true

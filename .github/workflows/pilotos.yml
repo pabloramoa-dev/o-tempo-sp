@@ -21,7 +21,7 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
       - run: pip install -r requirements-voice.txt pytest
       - run: python -m pytest -q
-      - run: python -m scripts.create_fixture
+      - run: python -m scripts.create_fixture --when "${{ matrix.turno }}"
       - run: python -m scripts.produce output/fixture.json "${{ matrix.turno }}"
       - run: ffprobe -v error -show_streams output/*.mp4
       - uses: actions/upload-artifact@v4
