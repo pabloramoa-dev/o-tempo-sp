@@ -4,4 +4,4 @@ Boletins da capital paulista em oito setores editoriais, abrangendo as 32 subpre
 
 A geometria de Bira e Bia, o piscar, a direção gestual e a síntese Kokoro foram adaptados do Previsão RJ (revisão 2f1724f03a2e00bcce807332dd15075eb3b5585b). As cópias são locais. Bira usa pm_alex a 1,04 e Bia usa pf_dora a 1,02. O estúdio usa HyperFrames 0.8.96 e GSAP 3.15.0 com os apresentadores SVG, bancada, ticker, legendas por palavra, trilha e transições do compositor do RJ. O telão mostra o skyline, o MASP e a Ponte Estaiada. Os oito pontos aparecem em dois quadros sucessivos.
 
-O workflow Pilotos Bira e Bia gera dois vídeos com dados simulados e executa os testes. O workflow Produzir Reels usa previsão real para hoje ou amanhã e entrega os artefatos sem publicar. Os agendamentos de produção dependem da variável AUTOMATION_ENABLED.
+O workflow Pilotos Bira e Bia gera dois vídeos com dados simulados e executa os testes. O workflow Produzir Reels usa previsão real para hoje ou amanhã e entrega os artefatos sem publicar. O GitHub Actions inicia a produção diária às 06h05 e 18h05, horário de São Paulo. Uma alteração no workflow de produção valida os dois turnos.
