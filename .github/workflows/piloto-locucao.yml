@@ -1,0 +1,54 @@
+name: Piloto com narração revisada
+on:
+  push:
+    branches: [piloto/bira-locucao-clara]
+    paths: ['.github/workflows/piloto-locucao.yml']
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-hyperframes
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng
+      - run: pip install -r requirements-voice.txt
+      - name: Gerar boletim com a voz original
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts import produce
+          from hyperframes import gerar_hf
+          from src.otemposp.editorial import summarise
+          snapshot = json.loads('''{"brand":"@otemposp","is_fixture":false,"fetched_at":"2026-11-08T15:13:23.735360+00:00","forecast_date":"2026-11-08","source":"Open-Meteo / best_match","source_url":"https://open-meteo.com/","api_endpoint":"https://api.open-meteo.com/v1/forecast","points":[{"id":"santana","name":"Santana","sector":"norte_1","latitude":-23.502,"longitude":-46.624,"spatial_fit":"medio","date":"2026-11-08","min_c":13.8,"max_c":19.4,"rain_probability_pct":100,"rain_mm":10.4,"weather_code":80,"rain_peak_hour":"13:00"},{"id":"pirituba","name":"Pirituba","sector":"norte_2","latitude":-23.491,"longitude":-46.728,"spatial_fit":"medio","date":"2026-11-08","min_c":14,"max_c":19.3,"rain_probability_pct":100,"rain_mm":10,"weather_code":80,"rain_peak_hour":"17:00"},{"id":"se","name":"Sé","sector":"centro","latitude":-23.5505,"longitude":-46.6333,"spatial_fit":"alto","date":"2026-11-08","min_c":13.8,"max_c":19.4,"rain_probability_pct":100,"rain_mm":10.4,"weather_code":80,"rain_peak_hour":"17:00"},{"id":"pinheiros","name":"Pinheiros","sector":"oeste","latitude":-23.565,"longitude":-46.698,"spatial_fit":"alto","date":"2026-11-08","min_c":14.1,"max_c":19.8,"rain_probability_pct":100,"rain_mm":13.1,"weather_code":80,"rain_peak_hour":"17:00"},{"id":"tatuape","name":"Tatuapé","sector":"leste_1","latitude":-23.54,"longitude":-46.575,"spatial_fit":"alto","date":"2026-11-08","min_c":13.8,"max_c":19.4,"rain_probability_pct":100,"rain_mm":10.4,"weather_code":80,"rain_peak_hour":"13:00"},{"id":"itaquera","name":"Itaquera","sector":"leste_2","latitude":-23.54,"longitude":-46.456,"spatial_fit":"medio","date":"2026-11-08","min_c":14.3,"max_c":20,"rain_probability_pct":100,"rain_mm":9.3,"weather_code":80,"rain_peak_hour":"13:00"},{"id":"vila_mariana","name":"Vila Mariana","sector":"sul_1","latitude":-23.588,"longitude":-46.636,"spatial_fit":"alto","date":"2026-11-08","min_c":14.1,"max_c":19.8,"rain_probability_pct":100,"rain_mm":13.1,"weather_code":80,"rain_peak_hour":"17:00"},{"id":"santo_amaro","name":"Santo Amaro","sector":"sul_2","latitude":-23.653,"longitude":-46.71,"spatial_fit":"medio","date":"2026-11-08","min_c":14.4,"max_c":19.9,"rain_probability_pct":100,"rain_mm":13.7,"weather_code":80,"rain_peak_hour":"23:00"}]}''')
+          brief = summarise(snapshot, "hoje")
+          original = produce.pauta
+          def roteiro(brief):
+              beats, cities = original(brief)
+              lines = [
+                  "Bom dia, São Paulo! Hoje é domingo. Vamos à previsão.",
+                  "Em Itaquera, na Zona Leste, a máxima chega a vinte graus.",
+                  "Em Santana, na Zona Norte, a chance de chuva é de cem por cento.",
+                  "Em Santana, a mínima prevista é de quatorze graus. A máxima chega a dezenove graus.",
+                  "Na Zona Sul, a previsão para Santo Amaro é parecida. Mínima de quatorze graus. Máxima de vinte graus.",
+                  "Vai sair? Leve o guarda-chuva. E conte pra gente de qual bairro você acompanha o boletim."
+              ]
+              assert len(beats) == len(lines)
+              for beat,line in zip(beats,lines):
+                  beat.update(fala=line,legenda=line)
+              return beats,cities
+          produce.pauta = roteiro
+          gerar_hf.PRESETS["bira"].update(speed=1.0,gap=.44)
+          produce.render_brief(brief,"output/bira.mp4")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bira-revisado
+          path: |
+            output/bira.mp4
+            hyperframes/build/pacote.json
