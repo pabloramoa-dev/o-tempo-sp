@@ -1,8 +1,9 @@
 name: Produzir Reels (publicação desativada) - O Tempo SP
 # O Action é capaz de GERAR o MP4 com Kokoro, mas não publicar automaticamente.
 # A etapa Meta exige fonte licenciada, conta @otemposp verificada e hospedagem HTTPS.
-# Antes de habilitar schedule configure vars.AUTOMATION_ENABLED='true'.
 on:
+  push:
+    paths: ['.github/workflows/reels.yml']
   schedule:
     - cron: '5 9 * * *'   # 06:05 São Paulo (UTC-3)
     - cron: '5 21 * * *'  # 18:05 São Paulo (UTC-3)
@@ -20,7 +21,10 @@ concurrency:
   cancel-in-progress: false
 jobs:
   render:
-    if: github.event_name == 'workflow_dispatch' || vars.AUTOMATION_ENABLED == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        turno: ${{ fromJSON(github.event_name == 'push' && '["hoje","amanhã"]' || (github.event.schedule == '5 21 * * *' || inputs.turno == 'amanhã') && '["amanhã"]' || '["hoje"]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -37,14 +41,11 @@ jobs:
       - name: Definir turno
         id: turno
         env:
-          EVENTO: ${{ github.event_name }}
-          AGENDA: ${{ github.event.schedule }}
-          MANUAL: ${{ inputs.turno }}
+          TURNO: ${{ matrix.turno }}
         run: |
           python - <<'PY'
           import os
-          a=os.environ.get('AGENDA','')
-          quando = os.environ.get('MANUAL','hoje') if os.environ['EVENTO']=='workflow_dispatch' else ('amanhã' if '21' in a else 'hoje')
+          quando = os.environ["TURNO"]
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write('quando='+quando+'\n')
               f.write('offset='+('1' if quando=='amanhã' else '0')+'\n')
@@ -61,5 +62,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: mp4-otemposp-${{ steps.turno.outputs.offset }}
-          path: output/
+          path: |
+            output/*.mp4
+            output/*.json
+            output/*.txt
           retention-days: 7
