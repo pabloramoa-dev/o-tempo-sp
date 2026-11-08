@@ -1,0 +1,38 @@
+name: Verificar conexão do Instagram
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verificar-instagram.yml']
+permissions: {}
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirmar identidade de @otemposp
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+        run: |
+          python - <<'PY'
+          import json, os, re, sys
+          from urllib.error import HTTPError
+          from urllib.request import Request, urlopen
+          missing = [k for k in ('IG_USER_ID','IG_ACCESS_TOKEN') if not os.getenv(k)]
+          if missing:
+              sys.exit('Configurar em Secrets do repositório: ' + ', '.join(missing))
+          uid, version = os.environ['IG_USER_ID'], os.environ['META_GRAPH_VERSION']
+          if not uid.isdecimal() or not re.fullmatch(r'v[0-9]+\.[0-9]+', version):
+              sys.exit('Conferir ID numérico e versão da API.')
+          url = f'https://graph.instagram.com/{version}/{uid}?fields=id,username'
+          req = Request(url, headers={'Authorization': 'Bearer ' + os.environ['IG_ACCESS_TOKEN']})
+          try:
+              with urlopen(req, timeout=30) as response:
+                  account = json.load(response)
+          except HTTPError as error:
+              sys.exit(f'A Meta respondeu HTTP {error.code}. Verifique token, ID, versão e permissões.')
+          if account.get('username','').casefold() != 'otemposp':
+              sys.exit('A conta retornada pela Meta não é @otemposp.')
+          print('Conexão confirmada com @otemposp.')
+          PY
