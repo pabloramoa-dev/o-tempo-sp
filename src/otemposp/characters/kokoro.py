@@ -27,6 +27,7 @@ Modelo (cacheado em $OTEMPOSP_KOKORO_DIR ou ~/.cache/otemposp_kokoro):
   kokoro-v1.0.onnx  +  voices-v1.0.bin
 """
 import argparse, json, os, subprocess, sys, wave
+import time
 import numpy as np
 
 SR = 44100
@@ -51,8 +52,18 @@ def garantir_modelo():
         # -f é essencial: sem ele o curl sai com codigo 0 mesmo num 404 e grava a
         # pagina de erro como se fosse o modelo. Em CI isso viraria um erro
         # confuso do onnxruntime la na frente, em vez de falhar aqui.
-        subprocess.run(["curl", "-fsSL", "--retry", "3", "--retry-delay", "2",
-                        "-o", alvo, url], check=True)
+        ids = {"kokoro-v1.0.onnx": (224414194, 325532387), "voices-v1.0.bin": (227558528, 28214398)}
+        asset, size = ids[nome]
+        api = f"https://api.github.com/repos/thewh1teagle/kokoro-onnx/releases/assets/{asset}"
+        for address in (api, url):
+            tmp = alvo + ".partial"
+            response = subprocess.run(["curl", "-fsSL", "--retry", "2", "-H", "Accept: application/octet-stream",
+                                       "-o", tmp, f"{address}?download={time.time_ns()}"])
+            if response.returncode == 0 and os.path.getsize(tmp) == size:
+                os.replace(tmp, alvo)
+                break
+        else:
+            raise RuntimeError(f"Não foi possível obter o arquivo original {nome}")
         if os.path.getsize(alvo) < 1_000_000:
             raise SystemExit(f"[kokoro] download de {nome} veio truncado "
                              f"({os.path.getsize(alvo)} bytes). Abortando.")
