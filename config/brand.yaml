@@ -1,0 +1,28 @@
+name: 'O TEMPO SP'
+username: 'otemposp'
+claim: 'São Paulo, região por região.'
+timezone: 'America/Sao_Paulo'
+colors:
+  ink: '#112A40'
+  sky: '#55B9E8'
+  yellow: '#FFCC4D'
+  alert: '#F05A5A'
+  white: '#FFFFFF'
+format:
+  width: 1080
+  height: 1920
+  safe_top: 150
+  safe_bottom: 360
+  safe_side: 90
+presenter:
+  name: 'Bira e Bia'
+  voice: 'pm_alex'
+  voice_speed: 0.94
+publication:
+  enabled: false
+  require_verified_account: true
+  require_commercial_data_license: true
+  min_covered_sectors: 8
+  max_snapshot_age_minutes: 120
+  require_real_voice: true
+  fail_on_unverified_alerts: true

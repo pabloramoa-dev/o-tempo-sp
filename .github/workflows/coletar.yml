@@ -1,0 +1,35 @@
+name: Coleta real (sem publicar) - O Tempo SP
+on:
+  workflow_dispatch:
+    inputs:
+      day_offset:
+        description: '0 = hoje; 1 = amanhã'
+        type: choice
+        options: ['0', '1']
+        default: '0'
+      tier:
+        description: '1 = 8 âncoras; 2 = 18 pontos'
+        type: choice
+        options: ['1', '2']
+        default: '2'
+permissions:
+  contents: read
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python -m src.otemposp.cli collect --tier "${{ inputs.tier }}" --day-offset "${{ inputs.day_offset }}" --out output/snapshot.json
+      - run: |
+          if [ "${{ inputs.day_offset }}" = 1 ]; then QUANDO=amanhã; else QUANDO=hoje; fi
+          python -m src.otemposp.cli editorial output/snapshot.json --when "$QUANDO" --out output/brief.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boletim-otemposp
+          path: output/
+          retention-days: 7

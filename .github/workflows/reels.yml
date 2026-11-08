@@ -1,0 +1,64 @@
+name: Produzir Reels (publicação desativada) - O Tempo SP
+# O Action é capaz de GERAR o MP4 com Kokoro, mas não publicar automaticamente.
+# A etapa Meta exige fonte licenciada, conta @otemposp verificada e hospedagem HTTPS.
+# Antes de habilitar schedule configure vars.AUTOMATION_ENABLED='true'.
+on:
+  schedule:
+    - cron: '5 9 * * *'   # 06:05 São Paulo (UTC-3)
+    - cron: '5 21 * * *'  # 18:05 São Paulo (UTC-3)
+  workflow_dispatch:
+    inputs:
+      turno:
+        description: 'Boletim para hoje ou amanhã'
+        type: choice
+        options: ['hoje', 'amanhã']
+        default: 'hoje'
+permissions:
+  contents: read
+concurrency:
+  group: otsep-reels-${{ github.event_name }}-${{ github.event.schedule || inputs.turno }}
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event_name == 'workflow_dispatch' || vars.AUTOMATION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar bibliotecas, FFmpeg e Kokoro
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
+          pip install -r requirements-voice.txt
+      - name: Definir turno
+        id: turno
+        env:
+          EVENTO: ${{ github.event_name }}
+          AGENDA: ${{ github.event.schedule }}
+          MANUAL: ${{ inputs.turno }}
+        run: |
+          python - <<'PY'
+          import os
+          a=os.environ.get('AGENDA','')
+          quando = os.environ.get('MANUAL','hoje') if os.environ['EVENTO']=='workflow_dispatch' else ('amanhã' if '21' in a else 'hoje')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('quando='+quando+'\n')
+              f.write('offset='+('1' if quando=='amanhã' else '0')+'\n')
+          PY
+      - name: Coletar, editar, narrar e renderizar
+        run: |
+          python -m src.otemposp.cli collect --tier 1 --day-offset ${{ steps.turno.outputs.offset }} --out output/snapshot.json
+          python -m src.otemposp.cli editorial output/snapshot.json --when "${{ steps.turno.outputs.quando }}" --out output/brief.json
+          python -m scripts.produce output/snapshot.json "${{ steps.turno.outputs.quando }}"
+      - name: Validar vídeo
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output/*.mp4 | grep -qx '1080,1920'
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 output/*.mp4 | grep -q codec_name
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mp4-otemposp-${{ steps.turno.outputs.offset }}
+          path: output/
+          retention-days: 7

@@ -1,0 +1,5 @@
+requests>=2.31,<3
+PyYAML>=6,<7
+Pillow>=10,<13
+numpy>=1.26,<3
+soundfile>=0.12,<1

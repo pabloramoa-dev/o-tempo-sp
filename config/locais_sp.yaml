@@ -1,0 +1,77 @@
+meta:
+  version: 1
+  brand: 'O Tempo SP'
+  instagram: '@otemposp'
+  city: 'São Paulo'
+  state: 'SP'
+  timezone: 'America/Sao_Paulo'
+  coverage: 'Somente município de São Paulo, não toda a região metropolitana'
+  note: 'Coordenadas aproximadas de pontos representativos; validar com base cartográfica oficial antes de alegar precisão distrital.'
+  official_subprefeituras_reference: 'https://prefeitura.sp.gov.br/subprefeitura'
+
+# 8 setores EDITORIAIS, distintos dos limites administrativos. 32 subprefeituras
+# pertencem a um e somente um setor. A previsão é atribuída ao PONTO consultado,
+# nunca a cada rua ou bairro inteiro indistintamente.
+sectors:
+  norte_1:
+    label: 'Zona Norte — Santana e Cantareira'
+    short: 'Norte 1'
+    subprefeituras: ['Santana/Tucuruvi', 'Jaçanã/Tremembé', 'Vila Maria/Vila Guilherme']
+    context: ['Serra da Cantareira', 'variações por relevo', 'deslocamentos']
+  norte_2:
+    label: 'Zona Norte — Noroeste'
+    short: 'Norte 2'
+    subprefeituras: ['Casa Verde', 'Freguesia do Ó/Brasilândia', 'Pirituba/Jaraguá', 'Perus']
+    context: ['Jaraguá', 'Perus', 'calor e chuva de tarde']
+  centro:
+    label: 'Centro'
+    short: 'Centro'
+    subprefeituras: ['Sé']
+    context: ['ilhas de calor', 'trabalho e deslocamentos']
+  oeste:
+    label: 'Zona Oeste'
+    short: 'Oeste'
+    subprefeituras: ['Lapa', 'Pinheiros', 'Butantã']
+    context: ['Marginal Pinheiros', 'deslocamentos', 'parques']
+  leste_1:
+    label: 'Zona Leste — Miolo e Sudeste'
+    short: 'Leste 1'
+    subprefeituras: ['Mooca', 'Penha', 'Aricanduva', 'Vila Prudente', 'Sapopemba', 'Ermelino Matarazzo']
+    context: ['calor urbano', 'chuva de tarde', 'deslocamentos']
+  leste_2:
+    label: 'Zona Leste — Extremo Leste'
+    short: 'Leste 2'
+    subprefeituras: ['Itaquera', 'São Miguel', 'Guaianases', 'Itaim Paulista', 'São Mateus', 'Cidade Tiradentes']
+    context: ['distância do Centro', 'pancadas de verão', 'trabalho e transporte']
+  sul_1:
+    label: 'Zona Sul — Centro-Sul'
+    short: 'Sul 1'
+    subprefeituras: ['Vila Mariana', 'Ipiranga', 'Jabaquara']
+    context: ['aeroporto e deslocamentos', 'áreas adensadas']
+  sul_2:
+    label: 'Zona Sul — Sul e Extremo Sul'
+    short: 'Sul 2'
+    subprefeituras: ['Santo Amaro', 'Campo Limpo', 'Capela do Socorro', 'M Boi Mirim', 'Parelheiros', 'Cidade Ademar']
+    context: ['represas', 'Parelheiros', 'Marsilac', 'contrastes ambientais']
+
+# Primeiro ponto de cada setor = âncora obrigatória da coleta do boletim diário.
+# Outros pontos para edição aprofundada e checagem de contraste espacial.
+locations:
+  - {id: santana, name: Santana, sector: norte_1, latitude: -23.502, longitude: -46.624, tier: 1, spatial_fit: medio}
+  - {id: tremembe, name: Tremembé, sector: norte_1, latitude: -23.461, longitude: -46.601, tier: 2, spatial_fit: baixo}
+  - {id: pirituba, name: Pirituba, sector: norte_2, latitude: -23.491, longitude: -46.728, tier: 1, spatial_fit: medio}
+  - {id: perus, name: Perus, sector: norte_2, latitude: -23.405, longitude: -46.752, tier: 2, spatial_fit: medio}
+  - {id: se, name: Sé, sector: centro, latitude: -23.5505, longitude: -46.6333, tier: 1, spatial_fit: alto}
+  - {id: republica, name: República, sector: centro, latitude: -23.543, longitude: -46.643, tier: 2, spatial_fit: alto}
+  - {id: pinheiros, name: Pinheiros, sector: oeste, latitude: -23.565, longitude: -46.698, tier: 1, spatial_fit: alto}
+  - {id: butanta, name: Butantã, sector: oeste, latitude: -23.572, longitude: -46.718, tier: 2, spatial_fit: medio}
+  - {id: tatuape, name: Tatuapé, sector: leste_1, latitude: -23.540, longitude: -46.575, tier: 1, spatial_fit: alto}
+  - {id: penha, name: Penha, sector: leste_1, latitude: -23.523, longitude: -46.546, tier: 2, spatial_fit: alto}
+  - {id: itaquera, name: Itaquera, sector: leste_2, latitude: -23.540, longitude: -46.456, tier: 1, spatial_fit: medio}
+  - {id: cidade_tiradentes, name: Cidade Tiradentes, sector: leste_2, latitude: -23.601, longitude: -46.406, tier: 2, spatial_fit: medio}
+  - {id: vila_mariana, name: Vila Mariana, sector: sul_1, latitude: -23.588, longitude: -46.636, tier: 1, spatial_fit: alto}
+  - {id: jabaquara, name: Jabaquara, sector: sul_1, latitude: -23.646, longitude: -46.646, tier: 2, spatial_fit: alto}
+  - {id: santo_amaro, name: Santo Amaro, sector: sul_2, latitude: -23.653, longitude: -46.710, tier: 1, spatial_fit: medio}
+  - {id: grajau, name: Grajaú, sector: sul_2, latitude: -23.750, longitude: -46.663, tier: 2, spatial_fit: medio}
+  - {id: parelheiros, name: Parelheiros, sector: sul_2, latitude: -23.824, longitude: -46.727, tier: 2, spatial_fit: baixo}
+  - {id: marsilac, name: Marsilac, sector: sul_2, latitude: -23.902, longitude: -46.709, tier: 2, spatial_fit: baixo}

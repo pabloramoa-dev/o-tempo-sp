@@ -1,0 +1,30 @@
+name: Pilotos Bira e Bia
+on:
+  push:
+    paths: ['.github/workflows/pilotos.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pilot:
+    strategy:
+      fail-fast: false
+      matrix:
+        turno: [hoje, amanhã]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
+      - run: pip install -r requirements-voice.txt pytest
+      - run: python -m pytest -q
+      - run: python -m scripts.create_fixture
+      - run: python -m scripts.produce output/fixture.json "${{ matrix.turno }}"
+      - run: ffprobe -v error -show_streams output/*.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: piloto-${{ matrix.turno }}
+          path: output/*.mp4
