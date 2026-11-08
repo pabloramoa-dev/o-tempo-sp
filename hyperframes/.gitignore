@@ -1,0 +1,5 @@
+build/
+index.html
+assets/audio/
+assets/vendor/
+*.mp4

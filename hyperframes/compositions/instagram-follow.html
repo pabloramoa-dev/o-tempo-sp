@@ -1,0 +1,42 @@
+<!-- hyperframes-registry-item: instagram-follow (adaptado: @otemposp, pt-BR, fonte local) -->
+<template id="instagram-follow-template">
+  <div data-composition-id="instagram-follow" data-width="1080" data-height="1920">
+    <style>
+      [data-composition-id="instagram-follow"] { position: absolute; inset: 0; width: 100%; height: 100%; }
+      [data-composition-id="instagram-follow"] .ig-linha { position: absolute; top: 700px; left: 0; right: 0; display: flex; justify-content: center; }
+      [data-composition-id="instagram-follow"] .ig-card { display: flex; align-items: center; gap: 26px; background-color: #1a1a1a; border: 5px solid #1c1c1e; border-radius: 75px; padding: 22px 34px 22px 22px; box-shadow: 0 12px 0 #1c1c1e; font-family: "Poppins", sans-serif; }
+      [data-composition-id="instagram-follow"] .ig-avatar { width: 120px; height: 120px; border-radius: 60px; border: 4px solid #FFD166; flex-shrink: 0; }
+      [data-composition-id="instagram-follow"] .ig-info { display: flex; flex-direction: column; margin-right: 10px; }
+      [data-composition-id="instagram-follow"] .ig-nome { font-size: 40px; font-weight: 700; color: #ffffff; line-height: 1.25; }
+      [data-composition-id="instagram-follow"] .ig-handle { font-size: 28px; color: #a0a0a0; line-height: 1.3; }
+      [data-composition-id="instagram-follow"] .ig-btn { position: relative; width: 230px; height: 80px; border-radius: 40px; background-color: #0095f6; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+      [data-composition-id="instagram-follow"] .ig-txt { position: absolute; font-size: 32px; font-weight: 700; color: #ffffff; white-space: nowrap; }
+      [data-composition-id="instagram-follow"] .ig-seguindo { opacity: 0; }
+    </style>
+    <div class="ig-linha">
+      <div id="ig-card" class="ig-card">
+        <img class="ig-avatar" src="assets/avatar.svg" alt="O TEMPO SP" />
+        <div class="ig-info">
+          <div class="ig-nome">O TEMPO SP</div>
+          <div class="ig-handle">@otemposp</div>
+        </div>
+        <div id="ig-btn" class="ig-btn">
+          <span id="ig-seguir" class="ig-txt">Seguir</span>
+          <span id="ig-seguindo" class="ig-txt ig-seguindo">Seguindo ✓</span>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var tl = gsap.timeline({ paused: true });
+        tl.fromTo("#ig-card", { y: 260, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 0.05);
+        tl.to("#ig-btn", { scale: 0.9, duration: 0.14, ease: "power2.out" }, 1.0);
+        tl.to("#ig-btn", { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.4)" }, 1.16);
+        tl.to("#ig-btn", { backgroundColor: "#2f2f2f", duration: 0.12, ease: "none" }, 1.14);
+        tl.to("#ig-seguir", { opacity: 0, duration: 0.08, ease: "none" }, 1.14);
+        tl.to("#ig-seguindo", { opacity: 1, duration: 0.08, ease: "none" }, 1.17);
+        window.__timelines["instagram-follow"] = tl;
+      })();
+    </script>
+  </div>
+</template>
