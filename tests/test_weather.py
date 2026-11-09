@@ -33,7 +33,7 @@ def test_coletor_open_meteo_em_lote():
             assert len(params['latitude'].split(','))==11
             assert 'precipitation_sum' in params['daily']
             return Reply()
-    assert len(collect(session=Session(), source='open_meteo')['points'])==8
+    assert len(collect(session=Session(), source='open_meteo')['points'])==11
 
 
 # ----------------------------------------------------------------- MET Norway
