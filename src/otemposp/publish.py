@@ -50,12 +50,15 @@ def guard(snapshot: dict, brief: dict, video_url: str):
 
 def publish(snapshot: dict, brief: dict, video_url: str) -> str:
     key, state = guard(snapshot, brief, video_url)
-    user = os.getenv('IG_USER_ID')
-    token = os.getenv('IG_ACCESS_TOKEN')
+    user = (os.getenv('IG_USER_ID') or '').strip()
+    token = (os.getenv('IG_ACCESS_TOKEN') or '').strip()
     if not user or not token:
         raise RuntimeError('IG_USER_ID e IG_ACCESS_TOKEN não configurados')
     version = os.getenv('META_GRAPH_VERSION', 'v26.0')
-    base = f'https://graph.instagram.com/{version}'
+    # Token do login unificado (EAA...) só funciona em graph.facebook.com;
+    # token do login do Instagram (IG...) usa graph.instagram.com.
+    host = os.getenv('META_GRAPH_HOST') or ('graph.facebook.com' if token.startswith('EAA') else 'graph.instagram.com')
+    base = f'https://{host}/{version}'
     session = requests.Session()
     info = session.get(f'{base}/{user}', params={'fields':'id,username','access_token':token},timeout=30)
     info.raise_for_status()
