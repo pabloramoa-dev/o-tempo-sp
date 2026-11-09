@@ -1,5 +1,5 @@
 meta:
-  version: 1
+  version: 2
   brand: 'O Tempo SP'
   instagram: '@otemposp'
   city: 'São Paulo'
@@ -8,6 +8,7 @@ meta:
   coverage: 'Somente município de São Paulo, não toda a região metropolitana'
   note: 'Coordenadas aproximadas de pontos representativos; validar com base cartográfica oficial antes de alegar precisão distrital.'
   official_subprefeituras_reference: 'https://prefeitura.sp.gov.br/subprefeitura'
+  altitude_reference: 'Altitude em metros (modelo digital Copernicus GLO-90), enviada à MET Norway para corrigir a temperatura pelo relevo.'
 
 # 8 setores EDITORIAIS, distintos dos limites administrativos. 32 subprefeituras
 # pertencem a um e somente um setor. A previsão é atribuída ao PONTO consultado,
@@ -54,24 +55,25 @@ sectors:
     subprefeituras: ['Santo Amaro', 'Campo Limpo', 'Capela do Socorro', 'M Boi Mirim', 'Parelheiros', 'Cidade Ademar']
     context: ['represas', 'Parelheiros', 'Marsilac', 'contrastes ambientais']
 
-# Primeiro ponto de cada setor = âncora obrigatória da coleta do boletim diário.
-# Outros pontos para edição aprofundada e checagem de contraste espacial.
+# Primeiro ponto de cada setor (tier 1) = âncora obrigatória do quadro do boletim.
+# Pontos tier 2 entram na coleta diária para achar extremos (mais frio, mais
+# chuvoso) e checar contraste espacial, sem substituir a âncora no quadro.
 locations:
-  - {id: santana, name: Santana, sector: norte_1, latitude: -23.502, longitude: -46.624, tier: 1, spatial_fit: medio}
-  - {id: tremembe, name: Tremembé, sector: norte_1, latitude: -23.461, longitude: -46.601, tier: 2, spatial_fit: baixo}
-  - {id: pirituba, name: Pirituba, sector: norte_2, latitude: -23.491, longitude: -46.728, tier: 1, spatial_fit: medio}
-  - {id: perus, name: Perus, sector: norte_2, latitude: -23.405, longitude: -46.752, tier: 2, spatial_fit: medio}
-  - {id: se, name: Sé, sector: centro, latitude: -23.5505, longitude: -46.6333, tier: 1, spatial_fit: alto}
-  - {id: republica, name: República, sector: centro, latitude: -23.543, longitude: -46.643, tier: 2, spatial_fit: alto}
-  - {id: pinheiros, name: Pinheiros, sector: oeste, latitude: -23.565, longitude: -46.698, tier: 1, spatial_fit: alto}
-  - {id: butanta, name: Butantã, sector: oeste, latitude: -23.572, longitude: -46.718, tier: 2, spatial_fit: medio}
-  - {id: tatuape, name: Tatuapé, sector: leste_1, latitude: -23.540, longitude: -46.575, tier: 1, spatial_fit: alto}
-  - {id: penha, name: Penha, sector: leste_1, latitude: -23.523, longitude: -46.546, tier: 2, spatial_fit: alto}
-  - {id: itaquera, name: Itaquera, sector: leste_2, latitude: -23.540, longitude: -46.456, tier: 1, spatial_fit: medio}
-  - {id: cidade_tiradentes, name: Cidade Tiradentes, sector: leste_2, latitude: -23.601, longitude: -46.406, tier: 2, spatial_fit: medio}
-  - {id: vila_mariana, name: Vila Mariana, sector: sul_1, latitude: -23.588, longitude: -46.636, tier: 1, spatial_fit: alto}
-  - {id: jabaquara, name: Jabaquara, sector: sul_1, latitude: -23.646, longitude: -46.646, tier: 2, spatial_fit: alto}
-  - {id: santo_amaro, name: Santo Amaro, sector: sul_2, latitude: -23.653, longitude: -46.710, tier: 1, spatial_fit: medio}
-  - {id: grajau, name: Grajaú, sector: sul_2, latitude: -23.750, longitude: -46.663, tier: 2, spatial_fit: medio}
-  - {id: parelheiros, name: Parelheiros, sector: sul_2, latitude: -23.824, longitude: -46.727, tier: 2, spatial_fit: baixo}
-  - {id: marsilac, name: Marsilac, sector: sul_2, latitude: -23.902, longitude: -46.709, tier: 2, spatial_fit: baixo}
+  - {id: santana, name: Santana, sector: norte_1, latitude: -23.502, longitude: -46.624, altitude: 736, tier: 1, spatial_fit: medio}
+  - {id: tremembe, name: Tremembé, sector: norte_1, latitude: -23.461, longitude: -46.601, altitude: 750, tier: 2, spatial_fit: baixo}
+  - {id: pirituba, name: Pirituba, sector: norte_2, latitude: -23.491, longitude: -46.728, altitude: 774, tier: 1, spatial_fit: medio}
+  - {id: perus, name: Perus, sector: norte_2, latitude: -23.405, longitude: -46.752, altitude: 743, tier: 2, spatial_fit: medio}
+  - {id: se, name: Sé, sector: centro, latitude: -23.5505, longitude: -46.6333, altitude: 758, tier: 1, spatial_fit: alto}
+  - {id: republica, name: República, sector: centro, latitude: -23.543, longitude: -46.643, altitude: 760, tier: 2, spatial_fit: alto}
+  - {id: pinheiros, name: Pinheiros, sector: oeste, latitude: -23.565, longitude: -46.698, altitude: 735, tier: 1, spatial_fit: alto}
+  - {id: butanta, name: Butantã, sector: oeste, latitude: -23.572, longitude: -46.718, altitude: 750, tier: 2, spatial_fit: medio}
+  - {id: tatuape, name: Tatuapé, sector: leste_1, latitude: -23.540, longitude: -46.575, altitude: 749, tier: 1, spatial_fit: alto}
+  - {id: penha, name: Penha, sector: leste_1, latitude: -23.523, longitude: -46.546, altitude: 770, tier: 2, spatial_fit: alto}
+  - {id: itaquera, name: Itaquera, sector: leste_2, latitude: -23.540, longitude: -46.456, altitude: 754, tier: 1, spatial_fit: medio}
+  - {id: cidade_tiradentes, name: Cidade Tiradentes, sector: leste_2, latitude: -23.601, longitude: -46.406, altitude: 844, tier: 2, spatial_fit: medio}
+  - {id: vila_mariana, name: Vila Mariana, sector: sul_1, latitude: -23.588, longitude: -46.636, altitude: 799, tier: 1, spatial_fit: alto}
+  - {id: jabaquara, name: Jabaquara, sector: sul_1, latitude: -23.646, longitude: -46.646, altitude: 807, tier: 2, spatial_fit: alto}
+  - {id: santo_amaro, name: Santo Amaro, sector: sul_2, latitude: -23.653, longitude: -46.710, altitude: 750, tier: 1, spatial_fit: medio}
+  - {id: grajau, name: Grajaú, sector: sul_2, latitude: -23.750, longitude: -46.663, altitude: 759, tier: 2, spatial_fit: medio}
+  - {id: parelheiros, name: Parelheiros, sector: sul_2, latitude: -23.824, longitude: -46.727, altitude: 778, tier: 2, spatial_fit: baixo}
+  - {id: marsilac, name: Marsilac, sector: sul_2, latitude: -23.902, longitude: -46.709, altitude: 794, tier: 2, spatial_fit: baixo}
