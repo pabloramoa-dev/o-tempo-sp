@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 import os
 from typing import Any
 import requests
-from .geo import locations, sectors
+from .geo import locations, sectors, daily_locations
 
 TZ = ZoneInfo('America/Sao_Paulo')
 
@@ -110,7 +110,7 @@ def parse_met(payloads: list[dict], points: list[dict], day_offset: int = 0,
 
 
 def collect_met(tier: int = 1, day_offset: int = 0, session=None) -> dict:
-    points = locations(tier)
+    points = daily_locations(datetime.now(TZ).date(), 'amanhã' if day_offset else 'hoje') if tier == 1 else locations(tier)
     s = session or requests.Session()
     payloads = []
     for p in points:
@@ -179,7 +179,7 @@ def parse(payload: Any, points: list[dict], model: str = 'best_match', day_offse
 
 
 def collect_open_meteo(tier: int = 1, day_offset: int = 0, session=None) -> dict:
-    points = locations(tier)
+    points = daily_locations(datetime.now(TZ).date(), 'amanhã' if day_offset else 'hoje') if tier == 1 else locations(tier)
     model = os.getenv('WEATHER_MODEL', 'best_match')
     query = {
         'latitude': ','.join(str(p['latitude']) for p in points),

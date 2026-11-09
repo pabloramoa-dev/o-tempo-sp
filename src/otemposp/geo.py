@@ -1,5 +1,10 @@
-"""8 setores da capital (32 subprefeituras) e 3 setores costeiros."""
+"""Geografia editorial: oito setores da capital e três do litoral paulista.
+
+O rodízio é reprodutível e depende somente da data local da PUBLICAÇÃO
+e do turno. Reexecuções do mesmo Reel usam os mesmos locais.
+"""
 from __future__ import annotations
+from datetime import date
 from functools import lru_cache
 from pathlib import Path
 import yaml
@@ -13,11 +18,37 @@ def config() -> dict:
 
 
 def locations(tier: int = 1) -> list[dict]:
+    """Catálogo até o tier selecionado; tier 1 mantém âncoras para fixtures."""
     return [p for p in config()['locations'] if p['tier'] <= tier]
 
 
 def sectors() -> dict:
     return config()['sectors']
+
+
+def daily_locations(published_on: date, when: str = 'hoje') -> list[dict]:
+    """Uma localidade diferente por setor a cada dia, em cada edição.
+
+    - 06h (hoje) e 18h (amanhã) usam opções diferentes no mesmo dia.
+    - A edição do dia seguinte não repete a localidade do dia anterior.
+    - As 11 regiões são obrigatórias e não dependem de sorteio ou estado remoto.
+    - O dia é a data LOCAL de publicação, não a data da previsão da Bia.
+    """
+    if not isinstance(published_on, date):
+        raise TypeError('published_on deve ser datetime.date local')
+    if when not in ('hoje', 'amanhã'):
+        raise ValueError('turno inválido para rodízio')
+    shift = 0 if when == 'hoje' else 2
+    chosen = []
+    for position, key in enumerate(sectors()):
+        options = [p for p in locations(2) if p['sector'] == key]
+        if len(options) < 3:
+            raise ValueError(f'Faltam opções para rodízio no setor {key}')
+        index = (published_on.toordinal() + shift + position * 3) % len(options)
+        chosen.append(dict(options[index]))
+    if len(chosen) != 11 or len({p['sector'] for p in chosen}) != 11:
+        raise ValueError('Rodízio sem cobertura integral de capital e litoral')
+    return chosen
 
 
 def validate() -> None:
@@ -32,8 +63,11 @@ def validate() -> None:
     assert all(not s['subprefeituras'] for s in litoral), 'litoral não possui subprefeitura da capital'
     pts = c['locations']
     assert len({x['id'] for x in pts}) == len(pts), 'IDs de locais duplicados'
+    assert len({x['name'].casefold() for x in pts}) == len(pts), 'Nomes de locais duplicados'
     for key in setores:
-        assert len([p for p in pts if p['sector'] == key and p['tier'] == 1]) == 1, f'âncora ausente/duplicada: {key}'
+        subset = [p for p in pts if p['sector'] == key]
+        assert len(subset) >= 3, f'Rodízio com poucas opções: {key}'
+        assert len([p for p in subset if p['tier'] == 1]) == 1, f'âncora ausente/duplicada: {key}'
     for p in pts:
         assert p['sector'] in setores, p
         lat, lon = float(p['latitude']), float(p['longitude'])
@@ -45,4 +79,4 @@ def validate() -> None:
 
 if __name__ == '__main__':
     validate()
-    print(f'OK: {len(sectors())} setores, 32 subprefeituras da capital, {len(locations(2))} pontos cadastrados')
+    print(f'OK: {len(sectors())} setores, 32 subprefeituras, {len(locations(2))} locais no rodízio')

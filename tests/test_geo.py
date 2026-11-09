@@ -8,11 +8,11 @@ def test_capital_mais_tres_areas_litoraneas():
     assert sum(s['group'] != 'litoral' for s in sectors().values()) == 8
     assert sum(s['group'] == 'litoral' for s in sectors().values()) == 3
     assert len(locations(1)) == 11
-    assert len(locations(2)) == 21
+    assert len(locations(2)) == 37
     assert set(p['sector'] for p in locations(1)) == set(sectors())
     assert {s['group'] for s in sectors().values()} == set(GRUPOS)
 
-def test_cidades_costeiras_presentes_diariamente():
+def test_ancoras_do_litoral_continuam_cadastradas():
     cidades = {p['name']: p for p in locations(1)}
     assert {'Caraguatatuba', 'Santos', 'Ilha Comprida'} <= set(cidades)
     for cidade in ('Caraguatatuba', 'Santos', 'Ilha Comprida'):
