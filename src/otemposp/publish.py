@@ -16,12 +16,18 @@ STATE = ROOT/'data/published.json'
 
 
 def guard(snapshot: dict, brief: dict, video_url: str):
-    required = ('PUBLISH_ENABLED', 'COMMERCIAL_DATA_LICENSE_OK')
-    for key in required:
-        if os.environ.get(key, '').lower() != 'true':
-            raise RuntimeError(f'Publicação BLOQUEADA: definir {key}=true após validação')
+    if os.environ.get('PUBLISH_ENABLED', '').lower() != 'true':
+        raise RuntimeError('Publicação BLOQUEADA: definir PUBLISH_ENABLED=true após validação')
     if snapshot.get('is_fixture') or brief.get('is_fixture'):
         raise RuntimeError('Dado fictício jamais pode ser publicado')
+    # MET Norway (CC BY 4.0) permite uso comercial com crédito; demais fontes exigem
+    # confirmação explícita de licença comercial.
+    met_no = snapshot.get('source_url') == 'https://api.met.no/' and snapshot.get('license') == 'CC BY 4.0'
+    if met_no:
+        if 'MET Norway' not in brief.get('caption', ''):
+            raise RuntimeError('Crédito "Dados: MET Norway" ausente da legenda (exigido pela licença CC BY 4.0)')
+    elif os.environ.get('COMMERCIAL_DATA_LICENSE_OK', '').lower() != 'true':
+        raise RuntimeError('Publicação BLOQUEADA: definir COMMERCIAL_DATA_LICENSE_OK=true após validação')
     if snapshot.get('source_url') == 'https://open-meteo.com/':
         if not snapshot.get('api_endpoint', '').startswith('https://customer-api.open-meteo.com/'):
             raise RuntimeError('Fonte Open-Meteo gratuita não autoriza publicação comercial; configurar API licenciada')
