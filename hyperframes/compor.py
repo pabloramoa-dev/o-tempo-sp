@@ -278,7 +278,7 @@ def cena_numero(p, cena, bat):
                  '<circle cx="0" cy="44" r="28" fill="#d63a2f" stroke="#10202e" stroke-width="7"/>'
                  '<rect x="-7" y="-20" width="14" height="60" fill="#d63a2f"/></svg>')
         bg = "#1f6fb0"
-    lugar = _lugar(b)
+    lugar = d.get("local") or _lugar(b)
     carimbo = (f'<div class="nu-carimbo" data-layout-allow-overlap="true"><span>{esc(lugar.upper())}</span></div>'
                if lugar else "")
     miolo = f'''{paisagem(p["ceu"], "n" + sid, com_sol=False)}
@@ -409,13 +409,18 @@ def compor(p):
     maxima_capa = round(max(c["max"] for c in p["cidades"]))
     data_curta = f'{p["data_ext"].split(",")[0][:3]} {d}/{m}'
     cenas_html = "".join(FAB[c["tipo"]](p, c, bat) for c in cenas)
-    ultima = cenas[-1]
-    if ultima["tipo"] == "cta":
-        t_siga = min(ultima["ini"] + 0.9, dur - 2.2)
+    # O botão de seguir deve aparecer no CTA, mesmo quando uma cena
+    # meteorológica (chuva) encerrar o vídeo depois dele.
+    cta_index = next((i for i, c in enumerate(cenas) if c["tipo"] == "cta"), None)
+    if cta_index is not None:
+        cta = cenas[cta_index]
+        cta_fim = cenas[cta_index + 1]["ini"] if cta_index + 1 < len(cenas) else dur
+        t_siga = min(cta["ini"] + 0.9, cta_fim - 0.4)
+        t_siga = round(max(0, t_siga), 2)
+        dur_follow = round(max(0.3, cta_fim - t_siga - (0.08 if cta_index + 1 < len(cenas) else 0)), 2)
     else:
-        t_siga = dur - 2.6
-    t_siga = round(max(0.5, t_siga), 2)
-    dur_follow = round(dur - t_siga, 2)
+        t_siga = round(max(0.5, dur - 2.6), 2)
+        dur_follow = round(dur - t_siga, 2)
 
     dados_js = json.dumps({
         "dur": dur,

@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 from src.otemposp.editorial import summarise
+from src.otemposp.chuva import maior_chuva
 from src.otemposp.temperatura import (graus_inteiros, agrupar_cidades_por_faixa,
                                    frase_faixa, juntar_nomes)
 
@@ -31,6 +32,12 @@ def pauta(brief):
                           titulo="TEMPERATURAS POR REGIÃO"))
     beats.append(beat("cta","Siga O Tempo SP e conte de qual bairro você acompanha a previsão.",
                       chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
+    # A última fala do vídeo destaca apenas a localidade com MAIOR acumulado,
+    # preservando o CTA antes do quadro final da chuva.
+    chuva = maior_chuva(cards, when)
+    if chuva is not None:
+        beats.append(beat("gancho", chuva["fala"], numero=f'{chuva["mm_fala"]} mm',
+                          sub="MAIOR CHUVA PREVISTA", local=chuva["point"]))
     return beats,cities
 
 def render_brief(brief,destination):
