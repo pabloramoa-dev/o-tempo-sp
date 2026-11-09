@@ -75,7 +75,7 @@ def deliver(snap,brief,mp4,kind,live):
         raise ValueError("Story reservado ao boletim do Bira")
     # Republicação expressamente solicitada: recibo próprio, sem alterar a edição diária.
     revisao = os.getenv("REEL_REPUBLICACAO", "").strip()
-    if revisao and (kind != "REELS" or revisao not in ("revisao-capa-temp-20261108", "previa-real-09nov2026")):
+    if revisao and (kind != "REELS" or revisao not in ("revisao-capa-temp-20261108", "previa-real-09nov2026", "chuva-final-bira-20261109")):
         raise ValueError("Identificador de republicação não autorizado")
     slot = f"{day}-{brief['when']}-{kind}" + (f"-{revisao}" if revisao else "")
     receipt=Receipt(slot) if live else None
@@ -163,7 +163,11 @@ def main():
     snap=json.loads(Path("output/snapshot.json").read_text())
     morning=brief["when"]=="hoje"
     video=Path("output/bira.mp4" if morning else "output/bia.mp4")
-    for kind in (("REELS","STORIES") if morning or sys.argv[1]!="live" else ("REELS",)):
-        deliver(snap,brief,video,kind,sys.argv[1]=="live")
+    # Republicação aprovada: apenas novo Reel, sem repetir o Story já publicado.
+    revisao = os.getenv("REEL_REPUBLICACAO", "").strip()
+    kinds = (("REELS",) if revisao and sys.argv[1] == "live" else
+             (("REELS", "STORIES") if morning or sys.argv[1] != "live" else ("REELS",)))
+    for kind in kinds:
+        deliver(snap, brief, video, kind, sys.argv[1] == "live")
 
 if __name__=="__main__":main()

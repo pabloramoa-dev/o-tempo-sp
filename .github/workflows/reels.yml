@@ -32,9 +32,9 @@ jobs:
       group: instagram-otemposp
       cancel-in-progress: false
     env:
-      TURNO: ${{ inputs.turno || (github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *') && 'hoje') || 'amanhã' }}
-      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109')) }}
-      REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
+      TURNO: ${{ inputs.turno || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109') && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *') && 'hoje') || 'amanhã' }}
+      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109')) }}
+      REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' && 'chuva-final-bira-20261109' || github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
