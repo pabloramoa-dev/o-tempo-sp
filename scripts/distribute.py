@@ -79,8 +79,31 @@ def deliver(snap,brief,mp4,kind,live):
         raise ValueError("Identificador de republicação não autorizado")
     slot = f"{day}-{brief['when']}-{kind}" + (f"-{revisao}" if revisao else "")
     receipt=Receipt(slot) if live else None
-    if receipt and receipt.data.get("published"):
-        print(kind,"já publicado",receipt.data.get("media_id",""));return
+    # Confirma que um ID publicado ainda existe na conta, em vez de confiar
+    # apenas no resultado verde do GitHub ou num recibo antigo.
+    def verify_publication(media_id):
+        fields = "id,media_type,permalink" if kind == "REELS" else "id,media_type"
+        error = "A Meta não confirmou a mídia"
+        for _ in range(8):
+            try:
+                details = get(str(media_id), fields)
+                if str(details.get("id")) == str(media_id) and (
+                    kind != "REELS" or details.get("permalink")
+                ):
+                    return details
+                error = "ID ou permalink ausente na resposta da Meta"
+            except (requests.RequestException, RuntimeError) as exc:
+                error = str(exc)
+            time.sleep(3)
+        raise RuntimeError(f"{kind}: mídia {media_id} não verificável na Meta: {error}")
+
+    if receipt and receipt.data.get("media_id"):
+        media_id = receipt.data["media_id"]
+        verified = verify_publication(media_id)
+        receipt.data.update(published=True, permalink=verified.get("permalink", ""))
+        receipt.save()
+        print(kind, "já publicado e verificado na Meta", media_id, verified.get("permalink", ""))
+        return
     cid=receipt.data.get("container") if receipt else None
     if not cid:
         args={"media_type":kind,"upload_type":"resumable"}
@@ -113,10 +136,9 @@ def deliver(snap,brief,mp4,kind,live):
     for _ in range(90):
         status=get(cid,"status_code")["status_code"]
         if status=="PUBLISHED":
-            if receipt:
-                receipt.data["published"]=True
-                receipt.save()
-            print(kind,"já confirmado pela Meta");return
+            # O container foi publicado, mas não temos o media_id recuperável.
+            # Não marcar sucesso de publicação sem confirmar a mídia final.
+            raise RuntimeError(f"{kind}: container {cid} está PUBLISHED, mas falta o media_id; requer verificação")
         if status=="FINISHED":break
         if status in ("ERROR","EXPIRED"):
             if receipt:
@@ -128,9 +150,13 @@ def deliver(snap,brief,mp4,kind,live):
     if not live:
         print(kind,"upload validado, sem publicação");return
     media=post(user+"/media_publish",{"creation_id":cid})["id"]
-    receipt.data.update(published=True,media_id=media)
+    # Salvar primeiro o ID para que uma falha na validação não publique em duplicidade.
+    receipt.data.update(media_id=media)
     receipt.save()
-    print(kind,"publicado",media)
+    verified = verify_publication(media)
+    receipt.data.update(published=True, permalink=verified.get("permalink", ""))
+    receipt.save()
+    print(kind, "publicado e confirmado na Meta", media, verified.get("permalink", ""))
 
 def main():
     brief=json.loads(Path("output/brief.json").read_text())
