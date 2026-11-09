@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 from scripts.met_forecast import ENDPOINT
+from src.otemposp.geo import sectors
 
 def result(response):
     if not response.ok:
@@ -69,7 +70,9 @@ def deliver(snap,brief,mp4,kind,live):
     if (snap["is_fixture"] or brief["is_fixture"] or snap["source_url"]!=ENDPOINT
         or not timedelta(0)<=age<=timedelta(hours=2) or
         brief["date"]!=day.isoformat() or snap["forecast_date"]!=brief["date"]
-        or len({p["sector"] for p in snap["points"]})!=8):
+        or len(snap["points"]) != len(sectors())
+        or {p["sector"] for p in snap["points"]} != set(sectors())
+        or len(brief["cards"]) != len(sectors())):
         raise ValueError("Recusado boletim fictício, vencido ou incompleto")
     if live and kind=="STORIES" and tomorrow:
         raise ValueError("Story reservado ao boletim do Bira")
