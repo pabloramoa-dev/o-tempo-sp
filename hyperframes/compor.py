@@ -46,7 +46,7 @@ MOUTH = {"X": 0.06, "A": 0.1, "B": 0.35, "C": 0.6, "D": 1.0, "E": 0.7,
 APRESENTADOR = {
     'bira': {'nome': 'BIRA DO TEMPO', 'cargo': 'MANHÃ EM SÃO PAULO', 'pele': '#A96D49',
              'camisa': '#273F60', 'logo': '#ffffff', 'kicker': 'PREVISÃO DAS 6H'},
-    'bia': {'nome': 'BIA DA ORLA', 'cargo': 'O TEMPO DE AMANHÃ EM SÃO PAULO', 'pele': '#C78359',
+    'bia': {'nome': 'BIA', 'cargo': 'O TEMPO DE AMANHÃ EM SÃO PAULO', 'pele': '#C78359',
             'camisa': '#893E56', 'logo': '#ffffff', 'kicker': 'PREVISÃO DAS 18H'},
 }
 
@@ -57,7 +57,7 @@ def esc(s):
 
 # ------------------------------------------------------- Bira / Bia (SVG) ---
 def apresentador_svg(nome):
-    """Bira do Tempo / Bia da Orla redesenhados em SVG a partir do rj_cast.py
+    """Bira do Tempo / Bia redesenhados em SVG a partir do rj_cast.py
     (Manim): 1 unidade = 150 px, cabeça centrada em (260, 230)."""
     c = APRESENTADOR[nome]
     bia = nome == 'bia'
