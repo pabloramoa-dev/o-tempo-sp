@@ -17,7 +17,10 @@ def result(response):
         try:
             error=response.json().get("error",{})
             detail=f"{error.get('code','')}/{error.get('error_subcode','')} {error.get('message','')}"
-            detail=detail.replace(os.environ["IG_ACCESS_TOKEN"],"[oculto]")
+            if not detail.strip(" /"):
+                # rupload pode usar debug_info em vez do campo error.
+                detail=str(response.json().get("debug_info") or response.json().get("message") or response.json())[:500]
+            detail=detail.replace(os.environ.get("IG_ACCESS_TOKEN",""),"[oculto]")
         except ValueError:
             detail=""
         raise RuntimeError(f"HTTP {response.status_code} {detail[:300]}")
@@ -91,10 +94,17 @@ def deliver(snap,brief,mp4,kind,live):
         uri=container["uri"]
         if urlparse(uri).hostname!="rupload.facebook.com" or urlparse(uri).scheme!="https":
             raise ValueError("Destino de upload inválido")
-        with mp4.open("rb") as video:
-            result(requests.post(uri,data=video,headers={"Authorization":"OAuth "+token,
-                "offset":"0","file_size":str(mp4.stat().st_size),"Content-Type":"application/octet-stream"},
-                timeout=180,allow_redirects=False))
+        for attempt in range(2):
+            with mp4.open("rb") as video:
+                uploaded=requests.post(uri,data=video,headers={"Authorization":"OAuth "+token,
+                    "offset":"0","file_size":str(mp4.stat().st_size),"Content-Type":"application/octet-stream"},
+                    timeout=180,allow_redirects=False)
+            if uploaded.ok:
+                break
+            if attempt == 0 and uploaded.status_code in (400,408,429,500,502,503,504):
+                time.sleep(5)
+                continue
+            result(uploaded)
         if receipt:
             receipt.data={"container":cid}
             receipt.save()
