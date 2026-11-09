@@ -87,7 +87,9 @@ def test_coleta_do_pipeline_usa_os_bairros_escolhidos_para_a_data(monkeypatch):
         def raise_for_status(self): pass
         def json(self): return {"properties": {"timeseries": hours}}
     class Session:
-        def __init__(self): self.points = []
+        def __init__(self):
+            self.points = []
+            self.headers = {}
         def __enter__(self): return self
         def __exit__(self, exc_type, exc, tb): return False
         def get(self, url, params, timeout):
