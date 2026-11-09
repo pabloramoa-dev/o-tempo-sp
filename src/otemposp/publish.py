@@ -22,7 +22,8 @@ def guard(snapshot: dict, brief: dict, video_url: str):
         raise RuntimeError('Dado fictício jamais pode ser publicado')
     # MET Norway (CC BY 4.0) permite uso comercial com crédito; demais fontes exigem
     # confirmação explícita de licença comercial.
-    met_no = snapshot.get('source_url') == 'https://api.met.no/' and snapshot.get('license') == 'CC BY 4.0'
+    met_no = (str(snapshot.get('source_url', '')).startswith('https://api.met.no/')
+              and snapshot.get('license') == 'CC BY 4.0')
     if met_no:
         if 'MET Norway' not in brief.get('caption', ''):
             raise RuntimeError('Crédito "Dados: MET Norway" ausente da legenda (exigido pela licença CC BY 4.0)')

@@ -1,9 +1,15 @@
-"""Temperaturas inteiras para locução e telas; dados meteorológicos seguem exatos."""
+"""Temperaturas inteiras para locução, telas e legenda — sempre o MESMO número."""
+import math
 
 
 def graus_inteiros(valor: float) -> int:
-    """Descarta a fração sem arredondar: 17,6 °C é narrado como 17 graus."""
-    return int(float(valor))
+    """Arredondamento convencional (meio para cima): 17,4 → 17; 17,5 → 18; 33,9 → 34.
+
+    Antes a fração era descartada (33,9 virava 33), o que diminuía o calor e
+    fazia o vídeo divergir da legenda. Agora vídeo, quadro e legenda usam
+    esta mesma função.
+    """
+    return int(math.floor(float(valor) + 0.5))
 
 
 def juntar_nomes(nomes: list[str]) -> str:
@@ -18,8 +24,6 @@ def juntar_nomes(nomes: list[str]) -> str:
 def agrupar_cidades_por_faixa(cidades: list[dict]) -> list[dict]:
     """Agrupa por mínima E máxima inteiras, nunca por uma só temperatura.
 
-    Exemplo: Pirituba, Sé e Santo Amaro com 17/28 ficam no mesmo grupo,
-    mesmo quando originalmente apareceriam em quadros de quatro diferentes.
     Não altera os registros originais nem seus valores meteorológicos.
     """
     grupos = {}
