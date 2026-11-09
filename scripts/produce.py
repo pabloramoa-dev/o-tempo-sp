@@ -7,10 +7,26 @@ from src.otemposp.chuva import maior_chuva
 from src.otemposp.temperatura import (graus_inteiros, agrupar_cidades_por_faixa,
                                    frase_faixa)
 
+# Cada região tem uma cena e uma fala própria: não fundir zonas distintas
+# apenas por terem as mesmas temperaturas.
+REGIOES = [
+    ("norte", "Zona Norte"), ("centro", "Centro"),
+    ("oeste", "Zona Oeste"), ("leste", "Zona Leste"),
+    ("sul", "Zona Sul"), ("litoral", "Litoral Paulista"),
+]
+
+def numero_extenso(n):
+    return {8: "oito", 11: "onze"}.get(n, str(n))
+
 def pauta(brief):
+    from src.otemposp.geo import sectors
     cards = brief["cards"]
-    cities = [dict(nome=c["point"], setor=c["short"], min=graus_inteiros(c["min_c"]), max=graus_inteiros(c["max_c"]),
-                   prob_chuva=c["rain_pct"], chuva_mm=c.get("rain_mm")) for c in cards]
+    conf = sectors()
+    if len(cards) != len(conf) or {c.get("sector") for c in cards} != set(conf):
+        raise ValueError("Boletim incompleto: uma cidade de cada setor da capital e do litoral é obrigatória")
+    cities = [dict(nome=c["point"], setor=c["short"], regiao=conf[c["sector"]]["group"],
+                   min=graus_inteiros(c["min_c"]), max=graus_inteiros(c["max_c"]),
+                   prob_chuva=c.get("rain_pct"), chuva_mm=c.get("rain_mm")) for c in cards]
     when = brief["when"]
     hot = brief["hottest"]
     def beat(tipo, fala, **dados):
@@ -18,44 +34,30 @@ def pauta(brief):
     beats = [beat("nenhum", ("Bom dia, São Paulo!" if when=="hoje" else "Boa noite, São Paulo!") +
                   (" Confira a previsão para amanhã." if when=="amanhã" else " Confira a previsão de hoje.")),
              beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
-                  numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
-             ]
-    # Grupos globais apenas para a FALA; cada cidade segue como linha isolada.
-    # Não dividir um grupo falado em dois quadros: seus nomes ficam visíveis
-    # durante a narração. Quadros com 5 a 8 linhas usam um modo compacto.
-    grupos = agrupar_cidades_por_faixa(cities)
-    por_nome = {cidade["nome"]: cidade for cidade in cities}
-    paginas, lote, linhas = [], [], []
-    for grupo in grupos:
-        integrantes = [por_nome[nome] for nome in grupo["nomes"]]
-        if linhas and len(linhas) + len(integrantes) > 4:
-            paginas.append((lote, linhas))
-            lote, linhas = [], []
-        lote.append(grupo)
-        linhas.extend(integrantes)
-    if lote:
-        paginas.append((lote, linhas))
-    for lote, linhas in paginas:
-        fala = " ".join(frase_faixa(g) for g in lote)
-        beats.append(beat("resumo", fala, cidades=linhas,
-                          grupos_falados=lote, titulo="TEMPERATURAS POR REGIÃO"))
-    beats.append(beat("cta","Siga O Tempo SP e conte de qual bairro você acompanha a previsão.",
-                      chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
-    # A última fala do vídeo destaca apenas a localidade com MAIOR acumulado,
-    # preservando o CTA antes do quadro final da chuva.
+                  numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA")]
+    for chave, titulo in REGIOES:
+        locais = [c for c in cities if c["regiao"] == chave]
+        if not locais:
+            raise ValueError(f"Região ausente do roteiro: {titulo}")
+        # Agrupar temperaturas repetidas só DENTRO da região; todos os
+        # nomes continuam aparecendo em linhas individuais.
+        faixas = agrupar_cidades_por_faixa(locais)
+        fala = f"Na {titulo}, " if chave != "centro" else "No Centro, "
+        fala += " ".join(frase_faixa(g) for g in faixas)
+        beats.append(beat("resumo", fala, cidades=locais, grupos_falados=faixas,
+                          titulo=titulo.upper()))
+    beats.append(beat("cta", "Siga O Tempo SP e conte de qual bairro ou cidade você acompanha a previsão.",
+                      chamada="DE ONDE VOCÊ ASSISTE?", sub="@otemposp"))
     chuva = maior_chuva(cards, when)
     if chuva is not None:
-        # Somente o maior acumulado: nome, milímetros e fala no quadro FINAL.
         beats.append(beat("gancho", chuva["fala"], numero=f'{chuva["mm_fala"]} mm',
                           sub="MAIOR CHUVA PREVISTA", local=chuva["point"]))
     elif all(c.get("rain_mm") is not None for c in cards):
-        # O boletim de hoje pode ter 0 mm em TODOS os oito locais. Sem este
-        # caso, a edição terminava no CTA, deixando a chuva sem explicação.
-        # Nunca inventar um "local mais chuvoso" se todos empataram em zero.
+        n = len(cards)
         beats.append(beat("gancho",
-                          f"Nos oito locais acompanhados, não há chuva prevista {when}.",
+                          f"Nos {numero_extenso(n)} locais acompanhados, não há chuva prevista {when}.",
                           numero="0 mm", sub="SEM CHUVA PREVISTA",
-                          local="8 LOCAIS MONITORADOS"))
+                          local=f"{n} LOCAIS MONITORADOS"))
     return beats,cities
 
 def render_brief(brief,destination):
