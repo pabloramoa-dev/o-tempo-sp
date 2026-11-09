@@ -2,6 +2,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 from .geo import sectors
+from .temperatura import graus_inteiros
 
 
 def _mm(value) -> str:
@@ -35,8 +36,8 @@ def summarise(snapshot: dict, when: str = 'hoje') -> dict:
     opening = f'O tempo em São Paulo {subject}, região por região!'
     commentary = (
         f'Entre os pontos acompanhados, a maior máxima prevista é em {hottest["point"]}, '
-        f'com {hottest["max_c"]:g} graus. '
-        f'A menor mínima aparece em {coldest["point"]}, com {coldest["min_c"]:g} graus. '
+        f'com {graus_inteiros(hottest["max_c"])} graus. '
+        f'A menor mínima aparece em {coldest["point"]}, com {graus_inteiros(coldest["min_c"])} graus. '
         'Confira os oito setores na tela e compartilhe com alguém do seu bairro. '
         'A previsão é estimativa por ponto, não previsão por rua.'
     )

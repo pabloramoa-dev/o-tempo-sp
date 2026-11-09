@@ -3,10 +3,11 @@ import json
 import sys
 from pathlib import Path
 from src.otemposp.editorial import summarise
+from src.otemposp.temperatura import graus_inteiros
 
 def pauta(brief):
     cards = brief["cards"]
-    cities = [dict(nome=c["point"], setor=c["short"], min=c["min_c"], max=c["max_c"],
+    cities = [dict(nome=c["point"], setor=c["short"], min=graus_inteiros(c["min_c"]), max=graus_inteiros(c["max_c"]),
                    prob_chuva=c["rain_pct"], chuva_mm=c.get("rain_mm")) for c in cards]
     when = brief["when"]
     hot = brief["hottest"]
@@ -14,12 +15,12 @@ def pauta(brief):
         return dict(tipo=tipo, fala=fala, legenda=fala, dados=dados)
     beats = [beat("nenhum", ("Bom dia, São Paulo!" if when=="hoje" else "Boa noite, São Paulo!") +
                   (" Confira a previsão para amanhã." if when=="amanhã" else " Confira a previsão de hoje.")),
-             beat("gancho", f"Em {hot['point']}, a máxima chega a {hot['max_c']:g} graus.",
-                  numero=f"{hot['max_c']:g}°", sub="MAIOR MÁXIMA"),
+             beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
+                  numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
              ]
     for i in (0, 4):
         rows=cities[i:i+4]
-        fala=" ".join(f"{c['nome']}: mínima de {round(c['min'])} e máxima de {round(c['max'])} graus." for c in rows)
+        fala=" ".join(f"{c['nome']}: mínima de {c['min']} e máxima de {c['max']} graus." for c in rows)
         beats.append(beat("resumo",fala,cidades=rows,titulo="PREVISÃO POR SETOR"))
     beats.append(beat("cta","Siga O Tempo SP e conte de qual bairro você acompanha a previsão.",
                       chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
