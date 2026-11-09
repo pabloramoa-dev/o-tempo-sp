@@ -70,14 +70,22 @@ def deliver(snap,brief,mp4,kind,live):
         raise ValueError("Recusado boletim fictício, vencido ou incompleto")
     if live and kind=="STORIES" and tomorrow:
         raise ValueError("Story reservado ao boletim do Bira")
-    receipt=Receipt(f"{day}-{brief['when']}-{kind}") if live else None
+    # Republicação expressamente solicitada: recibo próprio, sem alterar a edição diária.
+    revisao = os.getenv("REEL_REPUBLICACAO", "").strip()
+    if revisao and (kind != "REELS" or revisao != "revisao-capa-temp-20261108"):
+        raise ValueError("Identificador de republicação não autorizado")
+    slot = f"{day}-{brief['when']}-{kind}" + (f"-{revisao}" if revisao else "")
+    receipt=Receipt(slot) if live else None
     if receipt and receipt.data.get("published"):
         print(kind,"já publicado",receipt.data.get("media_id",""));return
     cid=receipt.data.get("container") if receipt else None
     if not cid:
         args={"media_type":kind,"upload_type":"resumable"}
         if kind=="REELS":
-            args.update(caption=brief["caption"],share_to_feed="true",thumb_offset="500")
+            caption = brief["caption"]
+            if revisao:
+                caption = "🌤️ Previsão atualizada do O TEMPO SP — nova capa e narração somente das temperaturas.\n\n" + caption
+            args.update(caption=caption,share_to_feed="true",thumb_offset="500")
         container=post(user+"/media",args)
         cid=container["id"]
         uri=container["uri"]

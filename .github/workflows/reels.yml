@@ -29,7 +29,8 @@ jobs:
       cancel-in-progress: false
     env:
       TURNO: ${{ inputs.turno || (github.event.schedule == '25 8 * * *' && 'hoje') || 'amanhã' }}
-      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) }}
+      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108') }}
+      REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
