@@ -75,7 +75,7 @@ def deliver(snap,brief,mp4,kind,live):
         raise ValueError("Story reservado ao boletim do Bira")
     # Republicação expressamente solicitada: recibo próprio, sem alterar a edição diária.
     revisao = os.getenv("REEL_REPUBLICACAO", "").strip()
-    if revisao and (kind != "REELS" or revisao != "revisao-capa-temp-20261108"):
+    if revisao and (kind != "REELS" or revisao not in ("revisao-capa-temp-20261108", "previa-real-09nov2026")):
         raise ValueError("Identificador de republicação não autorizado")
     slot = f"{day}-{brief['when']}-{kind}" + (f"-{revisao}" if revisao else "")
     receipt=Receipt(slot) if live else None
@@ -86,7 +86,9 @@ def deliver(snap,brief,mp4,kind,live):
         args={"media_type":kind,"upload_type":"resumable"}
         if kind=="REELS":
             caption = brief["caption"]
-            if revisao:
+            if revisao == "previa-real-09nov2026":
+                caption = "🌤️ O TEMPO SP — previsão real de amanhã, 9 de novembro! Temperaturas por região e o maior destaque de chuva no final.\n\n" + caption
+            elif revisao:
                 caption = "🌤️ Previsão atualizada do O TEMPO SP — nova capa e narração somente das temperaturas.\n\n" + caption
             args.update(caption=caption,share_to_feed="true",thumb_offset="500")
         container=post(user+"/media",args)

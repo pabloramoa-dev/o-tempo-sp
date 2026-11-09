@@ -1,0 +1,66 @@
+name: Publicar prévia real 09-11-2026 — O Tempo SP
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publicar-previa-real-09nov2026.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publicar-video-real:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    concurrency:
+      group: instagram-otemposp
+      cancel-in-progress: false
+    env:
+      REEL_REPUBLICACAO: previa-real-09nov2026
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dependências de publicação
+        run: python -m pip install -r requirements.txt
+      - name: Receber prévia real aprovada para publicação
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 70); do
+            result="$(gh run view 42548735727 --repo "$GITHUB_REPOSITORY" --json status,conclusion --jq '[.status,.conclusion] | join(":")')"
+            echo "Renderização da previsão: $result"
+            if [ "$result" = "completed:success" ]; then
+              break
+            elif [[ "$result" == completed:* ]]; then
+              echo "A geração real não concluiu com sucesso; publicação cancelada."
+              exit 1
+            fi
+            sleep 10
+          done
+          if [ "$result" != "completed:success" ]; then
+            echo "Arquivo real não ficou pronto; publicação cancelada."
+            exit 1
+          fi
+          mkdir -p output
+          gh run download 42548735727 --repo "$GITHUB_REPOSITORY" --name previa-real-sp-09nov2026 --dir output
+          test -s output/bia.mp4
+          test -s output/brief.json
+          test -s output/snapshot.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path("output/brief.json").read_text())
+          s=json.loads(Path("output/snapshot.json").read_text())
+          assert b["when"]=="amanhã" and b["date"]=="2026-11-09"
+          assert s["is_fixture"] is False and len(b["cards"])==8
+          assert Path("output/bia.mp4").stat().st_size>100000
+          print("MP4 de previsão real validado para publicação")
+          PY
+      - name: Publicar novo Reel no Instagram
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+        run: python -m scripts.distribute live
