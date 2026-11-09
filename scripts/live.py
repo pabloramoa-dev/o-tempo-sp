@@ -6,7 +6,7 @@ from src.otemposp.geo import sectors
 from scripts.produce import render_brief
 
 def pauta(brief):
-    """Narração curta: só temperaturas. Chuva permanece nos dados e na legenda."""
+    """Narração clara: só temperaturas. Chuva permanece nos dados e na legenda."""
     cards = brief["cards"]
     cities = [dict(nome=c["point"], setor=c.get("short", ""),
                    min=c["min_c"], max=c["max_c"], chuva_mm=c["rain_mm"],

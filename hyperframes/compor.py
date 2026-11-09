@@ -468,9 +468,9 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   font-family:"BarlowC",sans-serif;font-size:58px;letter-spacing:3px;color:{YEL}; }}
 .cover-title {{ position:absolute;top:390px;left:58px;right:58px;text-align:center;
   font-family:"BarlowC",sans-serif;font-size:156px;line-height:.94;color:#fff;text-shadow:0 9px 0 {PT}; }}
-.cover-day {{ position:absolute;top:800px;left:124px;right:124px;background:{YEL};color:{PT};
+.cover-day {{ position:absolute;top:858px;left:124px;right:124px;background:{YEL};color:{PT};
   border:6px solid {PT};border-radius:22px;text-align:center;font-family:"BarlowC",sans-serif;font-size:86px; }}
-.cover-temps {{ position:absolute;top:985px;left:85px;right:85px;display:flex;justify-content:center;
+.cover-temps {{ position:absolute;top:1038px;left:85px;right:85px;display:flex;justify-content:center;
   gap:28px;font-family:"BarlowCB",sans-serif;font-size:62px;text-shadow:0 5px 0 {PT}; }}
 .cover-temps span {{ background:rgba(9,27,47,.85);border:4px solid #a9dfff;border-radius:20px;padding:16px 23px; }}
 .cover-temps strong {{ color:{YEL}; }}
@@ -602,13 +602,13 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   function q(id, sel) {{ return document.querySelector("#" + id + " " + sel); }}
   function qa(id, sel) {{ return document.querySelectorAll("#" + id + " " + sel); }}
 
+  var tl = gsap.timeline({{ paused: true }});
   // A capa existe desde o primeiro frame e sai após 1,5s.
    tl.set("#cover-card", {{ opacity: 1 }}, 0);
    tl.set("#cover-card", {{ opacity: 0 }}, 1.5);
    // 1) TRANSIÇÕES entre cenas — receitas CSS do catálogo de transições do
   //    HyperFrames (glitch · whip pan · flash). CSS em vez de WebGL porque
   //    renderiza igual em qualquer máquina, inclusive no runner sem GPU.
-  var tl = gsap.timeline({{ paused: true }});
   var TR = {json.dumps(transicoes)};
   cenaIds.forEach(function (id, k) {{ tl.set("#" + id, {{ opacity: k === 0 ? 1 : 0, x: 0 }}, 0); }});
   TR.forEach(function (t, k) {{
