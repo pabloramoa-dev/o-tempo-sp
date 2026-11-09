@@ -1,4 +1,4 @@
-name: Verificar conexão do Instagram
+name: Verifique a conexão do Instagram
 on:
   workflow_dispatch:
   push:
@@ -19,20 +19,28 @@ jobs:
           import json, os, re, sys
           from urllib.error import HTTPError
           from urllib.request import Request, urlopen
-          missing = [k for k in ('IG_USER_ID','IG_ACCESS_TOKEN') if not os.getenv(k)]
+          missing = [k for k in ('IG_USER_ID', 'IG_ACCESS_TOKEN') if not os.getenv(k)]
           if missing:
-              sys.exit('Configurar em Secrets do repositório: ' + ', '.join(missing))
-          uid, version = os.environ['IG_USER_ID'], os.environ['META_GRAPH_VERSION']
+              sys.exit('Configurar segredos do repositório: ' + ', '.join(missing))
+          uid, version = os.environ['IG_USER_ID'].strip(), os.environ['META_GRAPH_VERSION']
+          token = os.environ['IG_ACCESS_TOKEN'].strip()
           if not uid.isdecimal() or not re.fullmatch(r'v[0-9]+\.[0-9]+', version):
               sys.exit('Conferir ID numérico e versão da API.')
-          url = f'https://graph.instagram.com/{version}/{uid}?fields=id,username'
-          req = Request(url, headers={'Authorization': 'Bearer ' + os.environ['IG_ACCESS_TOKEN']})
-          try:
-              with urlopen(req, timeout=30) as response:
-                  account = json.load(response)
-          except HTTPError as error:
-              sys.exit(f'A Meta respondeu HTTP {error.code}. Verifique token, ID, versão e permissões.')
-          if account.get('username','').casefold() != 'otemposp':
+          print('Formato do token:', 'EAA (login unificado/Facebook)' if token.startswith('EAA') else 'IG (login do Instagram)' if token.startswith('IG') else 'desconhecido', '| tamanho', len(token))
+          account, host_ok = None, None
+          for host in ('graph.instagram.com', 'graph.facebook.com'):
+              url = f'https://{host}/{version}/{uid}?fields=id,username'
+              req = Request(url, headers={'Authorization': 'Bearer ' + token})
+              try:
+                  with urlopen(req, timeout=30) as response:
+                      account, host_ok = json.load(response), host
+                      break
+              except HTTPError as error:
+                  body = error.read().decode('utf-8', 'replace')[:300]
+                  print(f'{host}: HTTP {error.code} - {body}')
+          if account is None:
+              sys.exit('A Meta recusou o token nos dois endereços. Verifique token, ID, versão e permissões.')
+          if account.get('username', '').casefold() != 'otemposp':
               sys.exit('A conta retornada pela Meta não é @otemposp.')
-          print('Conexão confirmada com @otemposp.')
+          print(f'Conexão confirmada com @otemposp via {host_ok}.')
           PY
