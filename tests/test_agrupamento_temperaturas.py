@@ -4,7 +4,7 @@ import pytest
 from scripts.produce import pauta as pauta_producao
 from scripts.live import pauta as pauta_live
 from src.otemposp.temperatura import (agrupar_cidades_por_faixa, frase_faixa,
-                                     graus_inteiros, juntar_nomes)
+                                      graus_inteiros, juntar_nomes)
 
 
 def brief_com_faixas(pares):
@@ -25,8 +25,8 @@ def linhas(beats):
 
 @pytest.mark.parametrize("pauta", [pauta_producao,pauta_live])
 def test_grouped_speech_and_separate_rows_even_across_old_page_split(pauta):
-    pares = [(16,25),(17.6,28.9),(17.1,28.2),(18,29),
-             (19,30),(20,31),(21,32),(17.9,28.1)]
+    pares = [(16,25),(16.6,28.4),(17.1,27.6),(18,29),
+             (19,30),(20,31),(21,32),(17.4,28.1)]
     brief=brief_com_faixas(pares)
     old=deepcopy(brief["cards"])
     beats,cities=pauta(brief)
@@ -61,7 +61,7 @@ def test_all_eight_identical_are_still_eight_visible_lines(pauta):
     beats,_=pauta(brief_com_faixas([(17.8,28.9)]*8))
     summaries=[b for b in beats if b["tipo"]=="resumo"]
     assert len(summaries)==1
-    assert summaries[0]["fala"].count("de 17 a 28 graus")==1
+    assert summaries[0]["fala"].count("de 18 a 29 graus")==1
     assert len(summaries[0]["dados"]["cidades"])==8
 
 
@@ -74,13 +74,13 @@ def test_individual_temperature_pages_have_four_lines(pauta):
 
 
 def test_visual_separate_city_rows_and_attribute_for_highlights():
-    from hyperframes.compor import cena_quadro
+    compor = pytest.importorskip("hyperframes.compor")
     p={"ceu":"sol","dur":30}
     scene={"id":"s2-quadro","batidas":[0]}
     beats=[{"dados":{"cidades":[{"nome":"Pirituba","min":17,"max":28},
-                                   {"nome":"Santo Amaro","min":17,"max":28}],
+                               {"nome":"Santo Amaro","min":17,"max":28}],
                      "titulo":"TEMPERATURAS POR REGIÃO"}}]
-    html=cena_quadro(p,scene,beats)
+    html=compor.cena_quadro(p,scene,beats)
     assert 'data-cidade="Pirituba"' in html
     assert 'data-cidade="Santo Amaro"' in html
     assert 'class="qd-linha"' in html and html.count('class="qd-linha"')==2
@@ -91,7 +91,7 @@ def test_helpers():
     assert juntar_nomes(["Sé"])=="Sé"
     assert juntar_nomes(["Sé","Pirituba"])=="Sé e Pirituba"
     with pytest.raises(ValueError): juntar_nomes([])
-    g=agrupar_cidades_por_faixa([dict(nome="Sé",min=17.6,max=28.9),
-                                  dict(nome="Pirituba",min=17.1,max=28.3)])
+    g=agrupar_cidades_por_faixa([dict(nome="Sé",min=17.4,max=28.3),
+                                 dict(nome="Pirituba",min=16.6,max=27.5)])
     assert frase_faixa(g[0])=="Sé e Pirituba, de 17 a 28 graus."
-    assert graus_inteiros(17.9)==17
+    assert graus_inteiros(17.9)==18

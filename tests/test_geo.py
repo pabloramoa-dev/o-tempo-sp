@@ -11,3 +11,6 @@ def test_32_subprefeituras_em_8_setores():
 def test_parelheiros_e_cantareira_tier2():
     ids = {x['id'] for x in locations(2)}
     assert {'parelheiros','tremembe','marsilac','perus'} <= ids
+
+def test_todos_os_pontos_tem_altitude():
+    assert all(600 < p['altitude'] < 1000 for p in locations(2))
