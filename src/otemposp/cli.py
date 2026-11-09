@@ -42,7 +42,7 @@ def main():
     pub.add_argument('--video-url',required=True)
     args = p.parse_args()
     if args.cmd == 'validate':
-        validate();print('OK: @otemposp, 8 setores, 32 subprefeituras')
+        validate();print('OK: @otemposp, 8 setores da capital, 3 do litoral, 32 subprefeituras')
     elif args.cmd == 'collect':
         validate();result=collect(tier=args.tier,day_offset=args.day_offset)
         print(write(args.out,result));print('Pontos:',len(result['points']),result['forecast_date'])
