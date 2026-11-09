@@ -306,7 +306,7 @@ def cena_quadro(p, cena, bat):
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade">{esc(c["nome"].upper())}</div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
-   <div class="qd-metrics"><span>CHUVA <b>{metric(c, "prob_chuva", "%")}</b></span></div>
+   <div class="qd-metrics"><span>CHUVA <b>{(metric(c, "chuva_mm", " mm", 1) if c.get("prob_chuva") is None else metric(c, "prob_chuva", "%"))}</b></span></div>
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
  <div class="qd-veu"></div>
@@ -807,3 +807,4 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 </body>
 </html>
 '''
+

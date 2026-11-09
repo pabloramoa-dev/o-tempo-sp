@@ -219,7 +219,10 @@ def preparar(personagem, out, brief):
     vendor.mkdir(parents=True, exist_ok=True)
     shutil.copy(RAIZ / 'video/node_modules/gsap/dist/gsap.min.js', vendor)
 
-    from scripts.produce import pauta
+    if "hora_inicio" in brief:
+        from scripts.live import pauta
+    else:
+        from scripts.produce import pauta
     formato = 'amanha_no_rio' if personagem == 'bia' else 'rio_antes_de_sair'
     demo = brief['is_fixture']
     batidas, cidades = pauta(brief)
@@ -269,7 +272,7 @@ def preparar(personagem, out, brief):
         'data': data_iso, 'data_ext': data_extenso(data_iso),
         'data_previsao': data_iso,
         'hora': f'{int(hora_alvo):02d}:00',
-        'ceu': 'chuva' if brief['wettest']['rain_pct'] >= 70 else 'sol',
+        'ceu': 'chuva' if (brief['wettest'].get('rain_mm', 0) >= 1 if "hora_inicio" in brief else brief['wettest']['rain_pct'] >= 70) else 'sol',
         'cidades': cidades,
         'batidas': [dict(b, ini=tempos[i][0], fim=tempos[i][1]) for i, b in enumerate(batidas)],
         'cenas': cenas, 'cortes': cortes, 'transicoes': trans,
@@ -330,3 +333,4 @@ def renderizar(out, pacote, qualidade='standard'):
     tmp.unlink()
     final.replace(out)
     return out
+

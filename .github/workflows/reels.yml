@@ -1,69 +1,79 @@
-name: Produzir Reels (publicação desativada) - O Tempo SP
-# O Action é capaz de GERAR o MP4 com Kokoro, mas não publicar automaticamente.
-# A etapa Meta exige fonte licenciada, conta @otemposp verificada e hospedagem HTTPS.
+name: Publicar Reels e Story — O Tempo SP
 on:
-  push:
-    paths: ['.github/workflows/reels.yml']
   schedule:
-    - cron: '5 9 * * *'   # 06:05 São Paulo (UTC-3)
-    - cron: '5 21 * * *'  # 18:05 São Paulo (UTC-3)
+    - cron: '25 8 * * *'
+    - cron: '25 20 * * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/reels.yml', 'scripts/distribute.py', 'scripts/met_forecast.py', 'scripts/live.py']
   workflow_dispatch:
     inputs:
       turno:
-        description: 'Boletim para hoje ou amanhã'
         type: choice
-        options: ['hoje', 'amanhã']
-        default: 'hoje'
+        options: [hoje, amanhã]
+        default: amanhã
+      publicar:
+        type: boolean
+        default: false
+        description: Publicar no Instagram
 permissions:
   contents: read
-concurrency:
-  group: otsep-reels-${{ github.event_name }}-${{ github.event.schedule || inputs.turno }}
-  cancel-in-progress: false
 jobs:
-  render:
-    strategy:
-      fail-fast: false
-      matrix:
-        turno: ${{ fromJSON(github.event_name == 'push' && '["hoje","amanhã"]' || (github.event.schedule == '5 21 * * *' || inputs.turno == 'amanhã') && '["amanhã"]' || '["hoje"]') }}
+  boletim:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 105
+    permissions:
+      contents: write
+    concurrency:
+      group: instagram-otemposp
+      cancel-in-progress: false
+    env:
+      TURNO: ${{ inputs.turno || (github.event.schedule == '25 8 * * *' && 'hoje') || 'amanhã' }}
+      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-hyperframes
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Instalar bibliotecas, FFmpeg e Kokoro
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
-          pip install -r requirements-voice.txt
-      - name: Definir turno
-        id: turno
-        env:
-          TURNO: ${{ matrix.turno }}
-        run: |
-          python - <<'PY'
-          import os
-          quando = os.environ["TURNO"]
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-              f.write('quando='+quando+'\n')
-              f.write('offset='+('1' if quando=='amanhã' else '0')+'\n')
-          PY
-      - name: Coletar, editar, narrar e renderizar
-        run: |
-          python -m src.otemposp.cli collect --tier 1 --day-offset ${{ steps.turno.outputs.offset }} --out output/snapshot.json
-          python -m src.otemposp.cli editorial output/snapshot.json --when "${{ steps.turno.outputs.quando }}" --out output/brief.json
-          python -m scripts.produce output/snapshot.json "${{ steps.turno.outputs.quando }}"
-      - name: Validar vídeo
-        run: |
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output/*.mp4 | grep -qx '1080,1920'
-          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 output/*.mp4 | grep -q codec_name
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng
+      - run: pip install -r requirements-voice.txt pytest
+      - run: python -m pytest -q
+      - name: Gerar edição com previsão real
+        run: python -m scripts.live "$TURNO"
       - uses: actions/upload-artifact@v4
         with:
-          name: mp4-otemposp-${{ steps.turno.outputs.offset }}
+          name: boletim-${{ env.TURNO }}
           path: |
             output/*.mp4
             output/*.json
             output/*.txt
           retention-days: 7
+      - name: Aguardar horário do boletim
+        if: github.event_name == 'schedule'
+        run: |
+          python - <<'PY'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          import os,time
+          now=datetime.now(ZoneInfo("America/Sao_Paulo"))
+          target=now.replace(hour=6 if os.environ["TURNO"]=="hoje" else 18,minute=0,second=0,microsecond=0)
+          delay=(target-now).total_seconds()
+          if delay < -7200 or delay > 3600:
+              raise SystemExit("Fora da janela do boletim")
+          time.sleep(max(0,delay))
+          PY
+      - name: Entregar MP4 à Meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+        run: |
+          if [ "$LIVE" = "true" ]; then
+            python -m scripts.distribute live
+          else
+            python -m scripts.distribute validar
+          fi

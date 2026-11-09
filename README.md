@@ -1,7 +1,6 @@
 # O TEMPO SP — @otemposp
 
-Boletins da capital paulista em oito setores editoriais, abrangendo as 32 subprefeituras. Cada setor usa um ponto representativo no boletim básico. Bira apresenta hoje pela manhã e Bia apresenta amanhã à noite. O fluxo de Reels coleta dados, gera o roteiro e exporta o vídeo. A publicação está desligada.
+Boletins com Bira e Bia cobrindo oito setores e 32 subprefeituras. Os Reels têm horário-alvo de 6h e 18h em São Paulo. O vídeo da manhã também sai como Story após a publicação do Reel. O GitHub inicia o preparo antes do horário-alvo. Atrasos do agendador podem atrasar a entrega.
 
-A geometria de Bira e Bia, o piscar, a direção gestual e a síntese Kokoro foram adaptados do Previsão RJ (revisão 2f1724f03a2e00bcce807332dd15075eb3b5585b). As cópias são locais. Bira usa pm_alex a 1,04 e Bia usa pf_dora a 1,02. O estúdio usa HyperFrames 0.8.96 e GSAP 3.15.0 com os apresentadores SVG, bancada, ticker, legendas por palavra, trilha e transições do compositor do RJ. O telão mostra o skyline, o MASP e a Ponte Estaiada. Os oito pontos aparecem em dois quadros sucessivos.
+A previsão de produção usa MET Norway Locationforecast, com atribuição na legenda e volume de chuva em milímetros. O vídeo vai diretamente à Meta. O registro separado por edição e formato em data/instagram permite retomar o Story sem reenviar o Reel. A publicação exige as credenciais da conta @otemposp. Execuções manuais iniciam em modo de teste por padrão.
 
-O workflow Pilotos Bira e Bia gera dois vídeos com dados simulados e executa os testes. O workflow Produzir Reels usa previsão real para hoje ou amanhã e entrega os artefatos sem publicar. O GitHub Actions inicia a produção diária às 06h05 e 18h05, horário de São Paulo. Uma alteração no workflow de produção valida os dois turnos.
