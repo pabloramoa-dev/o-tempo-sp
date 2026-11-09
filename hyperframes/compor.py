@@ -300,11 +300,12 @@ def cena_quadro(p, cena, bat):
             return "—"
         return f"{v:.{decimals}f}".replace(".", ",") + unit
     linhas = []
+    compacto = len(cidades) > 4
     for c in cidades:
         nome = c["nome"].upper()
-        fonte = 42 if len(nome) <= 19 else 37 if len(nome) <= 35 else 31 if len(nome) <= 60 else 26
+        fonte = 35 if compacto else (42 if len(nome) <= 19 else 37)
         linhas.append(f'''
-  <div class="qd-linha">
+  <div class="qd-linha" data-cidade="{esc(c["nome"])}">
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade" style="font-size:{fonte}px">{esc(nome)}</div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
@@ -312,7 +313,7 @@ def cena_quadro(p, cena, bat):
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
  <div class="qd-veu"></div>
  <div class="qd-topo"><span class="qd-check">✓</span><span class="qd-titulo">{esc(res["dados"].get("titulo", "NA REGIÃO"))}</span></div>
- <div class="qd-painel">
+ <div class="qd-painel{" qd-compacto" if compacto else ""}">
   <div class="qd-head"><span>POR SETOR</span><span class="qd-cols"><b>MÍN</b><b>MÁX</b></span></div>
   {"".join(linhas)}
   <div class="qd-dicas" data-qa-bounds="true">{esc(" · ".join(p.get("dicas_praticas", [])))}</div>
@@ -507,6 +508,16 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-cels span {{ width:82px;text-align:center; }}
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}
+/* Painel compacto quando um mesmo agrupamento contém 5 a 8 cidades. */
+.qd-compacto {{ padding:12px 24px 16px; }}
+.qd-compacto .qd-head {{ font-size:30px; margin-bottom:4px; }}
+.qd-compacto .qd-linha {{ min-height:62px; padding:2px 0 2px 16px; border-top-width:2px; }}
+.qd-compacto .qd-main {{ min-height:54px; }}
+.qd-compacto .qd-cidade {{ font-size:35px !important; }}
+.qd-compacto .qd-cels {{ font-size:37px; }}
+.qd-compacto .qd-cels span {{ width:72px; }}
+.qd-compacto .qd-barra {{ top:5px; height:49px; }}
+.qd-compacto .qd-dicas {{ font-size:22px; margin-top:4px; }}
 .qd-metrics {{ display:flex;justify-content:space-between;gap:10px;font-family:"BarlowCB",sans-serif;font-size:30px;color:#b9ccdd;line-height:30px; }}
 .qd-metrics b {{ color:white;font-weight:700; }}
 .qd-dicas {{ font-family:"BarlowCB",sans-serif;font-size:26px;color:{YEL};margin-top:12px;text-align:center;line-height:1.25; }}
@@ -696,19 +707,41 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
         tl.set(f, {{ textContent: alvoF }}, t0 + 7 * 0.045);
         tl.fromTo(f, {{ scaleY: 0.2 }}, {{ scaleY: 1, duration: 0.32, ease: "bounce.out" }}, t0);
       }});
-      var linhas = qa(id, ".qd-linha");
-      var norm = function (s) {{ return s.toUpperCase().replace(/[^A-ZÁÉÍÓÚÂÊÔÃÕÇ]/g, ""); }};
-      qa(id, ".qd-cidade").forEach(function (e, k) {{
-        var nome = norm(e.textContent.split(" ")[0]);
-        for (var i = 0; i < D.palavras.length; i++) {{
-          var w = D.palavras[i];
-          if (w[0] >= c.ini && w[0] < c.fim && norm(w[2]) === nome) {{
-            tl.fromTo(linhas[k].querySelector(".qd-barra"), {{ scaleY: 0.1 }}, {{ scaleY: 1, duration: 0.25, ease: "back.out(3)" }}, w[0]);
-            tl.fromTo(linhas[k], {{ backgroundColor: "rgba(255,209,102,0.30)" }}, {{ backgroundColor: "rgba(255,209,102,0)", duration: 1.0, ease: "power1.out", immediateRender: false }}, w[0]);
-            break;
-          }}
-        }}
-      }});
+       // Sincronizar o destaque com a palavra falada, por LOCALIDADE.
+       // São preservadas as cidades individuais, mesmo com fala agrupada.
+       var linhas = qa(id, ".qd-linha");
+       var norm = function (s) {{ return s.toUpperCase().replace(/[^A-ZÁÉÍÓÚÂÊÔÃÕÇ]/g, ""); }};
+       var marcas = [];
+       linhas.forEach(function (linha, k) {{
+         var tokens = (linha.getAttribute("data-cidade") || "").split(/\s+/).map(norm).filter(Boolean);
+         for (var i = 0; i < D.palavras.length; i++) {{
+           var w = D.palavras[i];
+           if (w[0] < c.ini || w[0] >= c.fim || norm(w[2]) !== tokens[0]) continue;
+           var coincide = true;
+           for (var j = 1; j < tokens.length; j++) {{
+             var prox = D.palavras[i + j];
+             if (!prox || prox[0] >= c.fim || norm(prox[2]) !== tokens[j]) {{
+               coincide = false;
+               break;
+             }}
+           }}
+           if (coincide) {{ marcas.push({{ index: k, t: w[0] }}); break; }}
+         }}
+       }});
+       marcas.sort(function (a, b) {{ return a.t - b.t; }});
+       marcas.forEach(function (marca, index) {{
+         var linha = linhas[marca.index];
+         var comeco = Math.max(c.ini + 0.10, marca.t);
+         var proxima = index + 1 < marcas.length ? marcas[index + 1].t : c.fim - 0.12;
+         var fim = Math.max(comeco + 0.22, Math.min(c.fim - 0.05, proxima));
+         var saida = Math.max(comeco + 0.08, fim - 0.18);
+         tl.set(linha, {{ backgroundColor: "rgba(255,209,102,0.46)", boxShadow: "inset 0 0 0 3px #ffd166" }}, comeco);
+         tl.set(linha.querySelector(".qd-cidade"), {{ color: "#ffe18b" }}, comeco);
+         tl.fromTo(linha.querySelector(".qd-barra"), {{ scaleY: 0.65 }}, {{ scaleY: 1.13, duration: 0.18, ease: "power2.out" }}, comeco);
+         tl.to(linha, {{ backgroundColor: "rgba(255,209,102,0)", boxShadow: "none", duration: 0.18 }}, saida);
+         tl.to(linha.querySelector(".qd-cidade"), {{ color: "#ffffff", duration: 0.18 }}, saida);
+       }});
+     }});
     }}
     // 5) ALERTA — triângulo pulsando, título batendo, carimbo ATENÇÃO
     if (c.tipo === "alerta") {{

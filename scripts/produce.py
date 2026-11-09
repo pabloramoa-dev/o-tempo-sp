@@ -5,7 +5,7 @@ from pathlib import Path
 from src.otemposp.editorial import summarise
 from src.otemposp.chuva import maior_chuva
 from src.otemposp.temperatura import (graus_inteiros, agrupar_cidades_por_faixa,
-                                   frase_faixa, juntar_nomes)
+                                   frase_faixa)
 
 def pauta(brief):
     cards = brief["cards"]
@@ -20,16 +20,25 @@ def pauta(brief):
              beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
                   numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
              ]
-    # Agrupamos TODOS os oito pontos antes de paginar: localidades de
-    # quadros diferentes com a mesma faixa são narradas numa única frase.
+    # Grupos globais apenas para a FALA; cada cidade segue como linha isolada.
+    # Não dividir um grupo falado em dois quadros: seus nomes ficam visíveis
+    # durante a narração. Quadros com 5 a 8 linhas usam um modo compacto.
     grupos = agrupar_cidades_por_faixa(cities)
-    for i in range(0, len(grupos), 4):
-        lote = grupos[i:i + 4]
-        rows = [dict(nome=juntar_nomes(g["nomes"]), min=g["min"],
-                     max=g["max"], nomes=g["nomes"]) for g in lote]
+    por_nome = {cidade["nome"]: cidade for cidade in cities}
+    paginas, lote, linhas = [], [], []
+    for grupo in grupos:
+        integrantes = [por_nome[nome] for nome in grupo["nomes"]]
+        if linhas and len(linhas) + len(integrantes) > 4:
+            paginas.append((lote, linhas))
+            lote, linhas = [], []
+        lote.append(grupo)
+        linhas.extend(integrantes)
+    if lote:
+        paginas.append((lote, linhas))
+    for lote, linhas in paginas:
         fala = " ".join(frase_faixa(g) for g in lote)
-        beats.append(beat("resumo", fala, cidades=rows,
-                          titulo="TEMPERATURAS POR REGIÃO"))
+        beats.append(beat("resumo", fala, cidades=linhas,
+                          grupos_falados=lote, titulo="TEMPERATURAS POR REGIÃO"))
     beats.append(beat("cta","Siga O Tempo SP e conte de qual bairro você acompanha a previsão.",
                       chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
     # A última fala do vídeo destaca apenas a localidade com MAIOR acumulado,
