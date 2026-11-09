@@ -741,7 +741,6 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
          tl.to(linha, {{ backgroundColor: "rgba(255,209,102,0)", boxShadow: "none", duration: 0.18 }}, saida);
          tl.to(linha.querySelector(".qd-cidade"), {{ color: "#ffffff", duration: 0.18 }}, saida);
        }});
-     }});
     }}
     // 5) ALERTA — triângulo pulsando, título batendo, carimbo ATENÇÃO
     if (c.tipo === "alerta") {{
