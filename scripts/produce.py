@@ -42,7 +42,7 @@ def pauta(brief):
         # Agrupar temperaturas repetidas só DENTRO da região; todos os
         # nomes continuam aparecendo em linhas individuais.
         faixas = agrupar_cidades_por_faixa(locais)
-        fala = f"Na {titulo}, " if chave != "centro" else "No Centro, "
+        fala = f"Na {titulo}, " if chave not in ("centro", "litoral") else f"No {titulo}, "
         fala += " ".join(frase_faixa(g) for g in faixas)
         beats.append(beat("resumo", fala, cidades=locais, grupos_falados=faixas,
                           titulo=titulo.upper()))
