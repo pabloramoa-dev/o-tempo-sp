@@ -3,7 +3,8 @@ import json
 import sys
 from pathlib import Path
 from src.otemposp.editorial import summarise
-from src.otemposp.temperatura import graus_inteiros
+from src.otemposp.temperatura import (graus_inteiros, agrupar_cidades_por_faixa,
+                                   frase_faixa, juntar_nomes)
 
 def pauta(brief):
     cards = brief["cards"]
@@ -18,10 +19,16 @@ def pauta(brief):
              beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
                   numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
              ]
-    for i in (0, 4):
-        rows=cities[i:i+4]
-        fala=" ".join(f"{c['nome']}: mínima de {c['min']} e máxima de {c['max']} graus." for c in rows)
-        beats.append(beat("resumo",fala,cidades=rows,titulo="PREVISÃO POR SETOR"))
+    # Agrupamos TODOS os oito pontos antes de paginar: localidades de
+    # quadros diferentes com a mesma faixa são narradas numa única frase.
+    grupos = agrupar_cidades_por_faixa(cities)
+    for i in range(0, len(grupos), 4):
+        lote = grupos[i:i + 4]
+        rows = [dict(nome=juntar_nomes(g["nomes"]), min=g["min"],
+                     max=g["max"], nomes=g["nomes"]) for g in lote]
+        fala = " ".join(frase_faixa(g) for g in lote)
+        beats.append(beat("resumo", fala, cidades=rows,
+                          titulo="TEMPERATURAS POR REGIÃO"))
     beats.append(beat("cta","Siga O Tempo SP e conte de qual bairro você acompanha a previsão.",
                       chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
     return beats,cities

@@ -301,12 +301,13 @@ def cena_quadro(p, cena, bat):
         return f"{v:.{decimals}f}".replace(".", ",") + unit
     linhas = []
     for c in cidades:
+        nome = c["nome"].upper()
+        fonte = 42 if len(nome) <= 19 else 37 if len(nome) <= 35 else 31 if len(nome) <= 60 else 26
         linhas.append(f'''
   <div class="qd-linha">
    <div class="qd-barra"></div>
-   <div class="qd-main"><div class="qd-cidade">{esc(c["nome"].upper())}</div>
+   <div class="qd-main"><div class="qd-cidade" style="font-size:{fonte}px">{esc(nome)}</div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
-
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
  <div class="qd-veu"></div>
@@ -493,11 +494,11 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-head {{ display: flex; justify-content: space-between; align-items: center; font-family: "BarlowCB", sans-serif; font-size: 36px; color: {YEL}; letter-spacing: 3px; margin-bottom: 8px; }}
 .qd-cols {{ display: flex; gap: 62px; padding-right: 22px; }}
 .qd-cols b {{ font-weight: 700; }}
-.qd-linha {{ position: relative; height: 88px; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
+.qd-linha {{ position: relative; min-height: 92px; height: auto; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
 .qd-barra {{ position:absolute;left:0;top:14px;width:8px;height:76px;background:{YEL};border-radius:5px; }}
-.qd-main {{ display:flex;align-items:center;justify-content:space-between;height:68px; }}
-.qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;color:white;white-space:nowrap; }}
-.qd-cels {{ display:flex;gap:30px;font-family:"BarlowC",sans-serif;font-size:44px; }}
+.qd-main {{ display:flex;align-items:center;justify-content:space-between;min-height:68px;height:auto;gap:14px; }}
+.qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;flex:1;min-width:0; }}
+.qd-cels {{ display:flex;flex-shrink:0;gap:8px;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:82px;text-align:center; }}
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}

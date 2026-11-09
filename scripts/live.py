@@ -3,36 +3,13 @@ import sys
 from pathlib import Path
 from scripts.met_forecast import collect, SOURCE
 from src.otemposp.geo import sectors
-from scripts.produce import render_brief
+from scripts.produce import render_brief, pauta as pauta_de_producao
 from src.otemposp.temperatura import graus_inteiros
 
 def pauta(brief):
-    """Narração clara: só temperaturas. Chuva permanece nos dados e na legenda."""
-    cards = brief["cards"]
-    cities = [dict(nome=c["point"], setor=c.get("short", ""),
-                   min=graus_inteiros(c["min_c"]), max=graus_inteiros(c["max_c"]), chuva_mm=c["rain_mm"],
-                   prob_chuva=None) for c in cards]
-    hot = brief["hottest"]
+    """Usa a mesma pauta agrupada do renderizador para evitar narrações divergentes."""
+    return pauta_de_producao(brief)
 
-    def beat(kind, text, **data):
-        return dict(tipo=kind, fala=text, legenda=text, dados=data)
-
-    morning = brief["when"] == "hoje"
-    beats = [
-        beat("nenhum", ("Bom dia, São Paulo! " if morning else "Boa noite, São Paulo! ")
-             + f"Confira as temperaturas de {brief['when']} por região."),
-        beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
-             numero=f"{round(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
-    ]
-    for group in (cities[:4], cities[4:]):
-        fala = " ".join(
-            f"{x['nome']}: mínima de {graus_inteiros(x['min'])} e máxima de {graus_inteiros(x['max'])} graus."
-            for x in group
-        )
-        beats.append(beat("resumo", fala, cidades=group, titulo="TEMPERATURAS POR REGIÃO"))
-    beats.append(beat("cta", "Conte pra gente de qual bairro você acompanha a previsão.",
-                      chamada="QUAL É O SEU BAIRRO?", sub="@otemposp"))
-    return beats, cities
 
 def run(when):
     snap=collect(int(when=="amanhã"))
