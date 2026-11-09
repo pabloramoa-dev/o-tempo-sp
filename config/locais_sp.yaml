@@ -81,8 +81,10 @@ sectors:
     subprefeituras: []
     context: ['Ilha Comprida', 'Iguape', 'Cananeia']
 
-# Primeiro ponto de cada setor = âncora obrigatória da coleta do boletim diário.
-# Outros pontos para edição aprofundada e checagem de contraste espacial.
+# O primeiro ponto de cada setor (tier 1) é a referência editorial fixa.
+# O boletim usa UM ponto por setor, escolhido por rodízio entre tiers 1 e 2,
+# variando por dia e entre edições de manhã e tarde. Todos os pontos são reais,
+# mas as coordenadas são aproximadas de centros de bairros/municípios.
 locations:
   - {id: santana, name: Santana, sector: norte_1, latitude: -23.502, longitude: -46.624, tier: 1, spatial_fit: medio}
   - {id: tremembe, name: Tremembé, sector: norte_1, latitude: -23.461, longitude: -46.601, tier: 2, spatial_fit: baixo}
@@ -107,3 +109,23 @@ locations:
   - {id: caraguatatuba, name: Caraguatatuba, sector: litoral_norte, latitude: -23.6208, longitude: -45.4131, tier: 1, spatial_fit: medio}
   - {id: santos, name: Santos, sector: litoral_baixada, latitude: -23.9608, longitude: -46.3336, tier: 1, spatial_fit: medio}
   - {id: ilha_comprida, name: Ilha Comprida, sector: litoral_sul, latitude: -24.7400, longitude: -47.5425, tier: 1, spatial_fit: medio}
+
+  # Novas opções da capital para o rodízio, mantendo a região de cada bairro.
+  - {id: vila_maria, name: Vila Maria, sector: norte_1, latitude: -23.5120, longitude: -46.5830, tier: 2, spatial_fit: medio}
+  - {id: freguesia_o, name: Freguesia do Ó, sector: norte_2, latitude: -23.5000, longitude: -46.7000, tier: 2, spatial_fit: medio}
+  - {id: liberdade, name: Liberdade, sector: centro, latitude: -23.5570, longitude: -46.6340, tier: 2, spatial_fit: medio}
+  - {id: lapa, name: Lapa, sector: oeste, latitude: -23.5240, longitude: -46.7030, tier: 2, spatial_fit: medio}
+  - {id: mooca, name: Mooca, sector: leste_1, latitude: -23.5540, longitude: -46.5990, tier: 2, spatial_fit: medio}
+  - {id: guaianases, name: Guaianases, sector: leste_2, latitude: -23.5435, longitude: -46.4157, tier: 2, spatial_fit: medio}
+  - {id: ipiranga, name: Ipiranga, sector: sul_1, latitude: -23.5850, longitude: -46.6070, tier: 2, spatial_fit: medio}
+  - {id: campo_limpo, name: Campo Limpo, sector: sul_2, latitude: -23.6510, longitude: -46.7660, tier: 2, spatial_fit: medio}
+
+  # Municipios do litoral para alternar as localidades citadas no Reels.
+  - {id: ubatuba, name: Ubatuba, sector: litoral_norte, latitude: -23.4330, longitude: -45.0830, tier: 2, spatial_fit: medio}
+  - {id: sao_sebastiao, name: São Sebastião, sector: litoral_norte, latitude: -23.8060, longitude: -45.4040, tier: 2, spatial_fit: medio}
+  - {id: ilhabela, name: Ilhabela, sector: litoral_norte, latitude: -23.8140, longitude: -45.3690, tier: 2, spatial_fit: medio}
+  - {id: guaruja, name: Guarujá, sector: litoral_baixada, latitude: -23.9930, longitude: -46.2580, tier: 2, spatial_fit: medio}
+  - {id: praia_grande, name: Praia Grande, sector: litoral_baixada, latitude: -24.0030, longitude: -46.4130, tier: 2, spatial_fit: medio}
+  - {id: peruibe, name: Peruíbe, sector: litoral_baixada, latitude: -24.3200, longitude: -47.0000, tier: 2, spatial_fit: medio}
+  - {id: iguape, name: Iguape, sector: litoral_sul, latitude: -24.7080, longitude: -47.5550, tier: 2, spatial_fit: medio}
+  - {id: cananeia, name: Cananéia, sector: litoral_sul, latitude: -25.0140, longitude: -47.9250, tier: 2, spatial_fit: medio}
