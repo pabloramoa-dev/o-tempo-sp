@@ -1,8 +1,12 @@
 name: Publicar Reels e Story — O Tempo SP
 on:
+  # Tentativas antecipadas e redundantes para diminuir falhas do agendador.
+  # São Paulo: 05:13/05:41 (boletim 06h), 17:13/17:41 (boletim 18h).
   schedule:
-    - cron: '25 8 * * *'
-    - cron: '25 20 * * *'
+    - cron: '13 8 * * *'
+    - cron: '41 8 * * *'
+    - cron: '13 20 * * *'
+    - cron: '41 20 * * *'
   push:
     branches: [main]
     paths: ['.github/workflows/reels.yml', 'scripts/distribute.py', 'scripts/met_forecast.py', 'scripts/live.py']
@@ -28,8 +32,8 @@ jobs:
       group: instagram-otemposp
       cancel-in-progress: false
     env:
-      TURNO: ${{ inputs.turno || (github.event.schedule == '25 8 * * *' && 'hoje') || 'amanhã' }}
-      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108') }}
+      TURNO: ${{ inputs.turno || (github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *') && 'hoje') || 'amanhã' }}
+      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109')) }}
       REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
     steps:
       - uses: actions/checkout@v4
