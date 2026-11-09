@@ -32,5 +32,5 @@ def test_decimais_sao_descartados_na_voz():
         assert "17 graus" in falas
         assert "17.6" not in falas and "17,6" not in falas
         assert "18 graus" not in falas
-        assert len(cidades) == 8
+        assert len(cidades) == 11
         assert all(isinstance(c["min"], int) and isinstance(c["max"], int) for c in cidades)

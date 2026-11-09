@@ -5,54 +5,81 @@ meta:
   city: 'São Paulo'
   state: 'SP'
   timezone: 'America/Sao_Paulo'
-  coverage: 'Somente município de São Paulo, não toda a região metropolitana'
+  coverage: 'São Paulo capital (8 setores) e litoral paulista (Litoral Norte, Baixada Santista e Litoral Sul)'
   note: 'Coordenadas aproximadas de pontos representativos; validar com base cartográfica oficial antes de alegar precisão distrital.'
   official_subprefeituras_reference: 'https://prefeitura.sp.gov.br/subprefeitura'
+  official_litoral_reference: 'https://semil.sp.gov.br/sma/gerco/'
 
-# 8 setores EDITORIAIS, distintos dos limites administrativos. 32 subprefeituras
-# pertencem a um e somente um setor. A previsão é atribuída ao PONTO consultado,
-# nunca a cada rua ou bairro inteiro indistintamente.
+# São 8 setores editoriais da capital (32 subprefeituras) MAIS 3 setores do
+# litoral paulista. Os oito primeiros são bairros/pontos da capital; os últimos
+# são municípios costeiros. Previsão vale para o PONTO, não todo o território.
 sectors:
   norte_1:
+    group: 'norte'
     label: 'Zona Norte — Santana e Cantareira'
     short: 'Norte 1'
     subprefeituras: ['Santana/Tucuruvi', 'Jaçanã/Tremembé', 'Vila Maria/Vila Guilherme']
     context: ['Serra da Cantareira', 'variações por relevo', 'deslocamentos']
   norte_2:
+    group: 'norte'
     label: 'Zona Norte — Noroeste'
     short: 'Norte 2'
     subprefeituras: ['Casa Verde', 'Freguesia do Ó/Brasilândia', 'Pirituba/Jaraguá', 'Perus']
     context: ['Jaraguá', 'Perus', 'calor e chuva de tarde']
   centro:
+    group: 'centro'
     label: 'Centro'
     short: 'Centro'
     subprefeituras: ['Sé']
     context: ['ilhas de calor', 'trabalho e deslocamentos']
   oeste:
+    group: 'oeste'
     label: 'Zona Oeste'
     short: 'Oeste'
     subprefeituras: ['Lapa', 'Pinheiros', 'Butantã']
     context: ['Marginal Pinheiros', 'deslocamentos', 'parques']
   leste_1:
+    group: 'leste'
     label: 'Zona Leste — Miolo e Sudeste'
     short: 'Leste 1'
     subprefeituras: ['Mooca', 'Penha', 'Aricanduva', 'Vila Prudente', 'Sapopemba', 'Ermelino Matarazzo']
     context: ['calor urbano', 'chuva de tarde', 'deslocamentos']
   leste_2:
+    group: 'leste'
     label: 'Zona Leste — Extremo Leste'
     short: 'Leste 2'
     subprefeituras: ['Itaquera', 'São Miguel', 'Guaianases', 'Itaim Paulista', 'São Mateus', 'Cidade Tiradentes']
     context: ['distância do Centro', 'pancadas de verão', 'trabalho e transporte']
   sul_1:
+    group: 'sul'
     label: 'Zona Sul — Centro-Sul'
     short: 'Sul 1'
     subprefeituras: ['Vila Mariana', 'Ipiranga', 'Jabaquara']
     context: ['aeroporto e deslocamentos', 'áreas adensadas']
   sul_2:
+    group: 'sul'
     label: 'Zona Sul — Sul e Extremo Sul'
     short: 'Sul 2'
     subprefeituras: ['Santo Amaro', 'Campo Limpo', 'Capela do Socorro', 'M Boi Mirim', 'Parelheiros', 'Cidade Ademar']
     context: ['represas', 'Parelheiros', 'Marsilac', 'contrastes ambientais']
+  litoral_norte:
+    group: 'litoral'
+    label: 'Litoral Norte'
+    short: 'Litoral N.'
+    subprefeituras: []
+    context: ['Caraguatatuba', 'Ubatuba', 'São Sebastião', 'Ilhabela']
+  litoral_baixada:
+    group: 'litoral'
+    label: 'Baixada Santista'
+    short: 'Baixada'
+    subprefeituras: []
+    context: ['Santos', 'Guarujá', 'Praia Grande', 'Peruíbe']
+  litoral_sul:
+    group: 'litoral'
+    label: 'Litoral Sul — Iguape, Cananeia e Ilha Comprida'
+    short: 'Litoral S.'
+    subprefeituras: []
+    context: ['Ilha Comprida', 'Iguape', 'Cananeia']
 
 # Primeiro ponto de cada setor = âncora obrigatória da coleta do boletim diário.
 # Outros pontos para edição aprofundada e checagem de contraste espacial.
@@ -75,3 +102,8 @@ locations:
   - {id: grajau, name: Grajaú, sector: sul_2, latitude: -23.750, longitude: -46.663, tier: 2, spatial_fit: medio}
   - {id: parelheiros, name: Parelheiros, sector: sul_2, latitude: -23.824, longitude: -46.727, tier: 2, spatial_fit: baixo}
   - {id: marsilac, name: Marsilac, sector: sul_2, latitude: -23.902, longitude: -46.709, tier: 2, spatial_fit: baixo}
+
+  # Litoral: municípios reais em pontos aproximados (não bairros da capital).
+  - {id: caraguatatuba, name: Caraguatatuba, sector: litoral_norte, latitude: -23.6208, longitude: -45.4131, tier: 1, spatial_fit: medio}
+  - {id: santos, name: Santos, sector: litoral_baixada, latitude: -23.9608, longitude: -46.3336, tier: 1, spatial_fit: medio}
+  - {id: ilha_comprida, name: Ilha Comprida, sector: litoral_sul, latitude: -24.7400, longitude: -47.5425, tier: 1, spatial_fit: medio}

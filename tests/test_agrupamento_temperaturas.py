@@ -1,91 +1,86 @@
-"""Narrar intervalos comuns sem fundir localidades na imagem."""
+"""Uma fala por região, temperatura agrupada apenas DENTRO da região."""
 from copy import deepcopy
 import pytest
 from scripts.produce import pauta as pauta_producao
 from scripts.live import pauta as pauta_live
-from src.otemposp.temperatura import (agrupar_cidades_por_faixa, frase_faixa,
-                                     graus_inteiros, juntar_nomes)
-
+from src.otemposp.geo import locations, sectors
+from src.otemposp.temperatura import (
+    agrupar_cidades_por_faixa, frase_faixa, graus_inteiros, juntar_nomes)
 
 def brief_com_faixas(pares):
-    nomes = ["Santana", "Pirituba", "Sé", "Pinheiros",
-             "Tatuapé", "Itaquera", "Vila Mariana", "Santo Amaro"]
-    assert len(pares) == len(nomes)
-    cards = [dict(point=nome, short=nome.upper(), min_c=float(minima),
-                  max_c=float(maxima), rain_pct=None, rain_mm=0)
-             for nome, (minima, maxima) in zip(nomes, pares)]
-    return dict(cards=cards, when="hoje", hottest=max(cards, key=lambda c:c["max_c"]),
-                wettest=cards[0], is_fixture=True)
+    pontos=locations(1)
+    assert len(pares)==len(pontos)==11
+    cards=[dict(point=p["name"],sector=p["sector"],short=sectors()[p["sector"]]["short"],
+                min_c=float(a),max_c=float(b),rain_pct=None,rain_mm=0)
+           for p,(a,b) in zip(pontos,pares)]
+    return dict(cards=cards,when="hoje",hottest=max(cards,key=lambda c:c["max_c"]),
+                wettest=cards[0],is_fixture=True)
 
+def resumos(beats):
+    return [b for b in beats if b["tipo"]=="resumo"]
 
 def linhas(beats):
-    return [cidade for b in beats if b["tipo"]=="resumo"
-            for cidade in b["dados"]["cidades"]]
-
-
-@pytest.mark.parametrize("pauta", [pauta_producao,pauta_live])
-def test_grouped_speech_and_separate_rows_even_across_old_page_split(pauta):
-    pares = [(16,25),(17.6,28.9),(17.1,28.2),(18,29),
-             (19,30),(20,31),(21,32),(17.9,28.1)]
-    brief=brief_com_faixas(pares)
-    old=deepcopy(brief["cards"])
-    beats,cities=pauta(brief)
-    summaries=[b for b in beats if b["tipo"]=="resumo"]
-    joined=" ".join(b["fala"] for b in summaries)
-    assert "Pirituba, Sé e Santo Amaro, de 17 a 28 graus." in joined
-    assert joined.count("de 17 a 28 graus") == 1
-    rows=linhas(beats)
-    assert len(rows)==8 and len(cities)==8
-    assert len({x["nome"] for x in rows})==8
-    assert {x["nome"] for x in rows}=={x["nome"] for x in cities}
-    assert all(x["nome"] in [c["point"] for c in old] for x in rows)
-    matching=next(b for b in summaries if "Pirituba, Sé e Santo Amaro" in b["fala"])
-    assert {"Pirituba","Sé","Santo Amaro"}.issubset({x["nome"] for x in matching["dados"]["cidades"]})
-    assert len([x for x in rows if x["min"]==17 and x["max"]==28])==3
-    assert brief["cards"]==old
-
+    return [cidade for b in resumos(beats) for cidade in b["dados"]["cidades"]]
 
 @pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
-def test_only_group_same_min_and_max(pauta):
-    pares=[(17,28),(17,29),(18,28),(17,28),(17,29),(18,28),(17,27),(17,27)]
-    beats,cities=pauta(brief_com_faixas(pares))
-    spoken=" ".join(b["fala"] for b in beats if b["tipo"]=="resumo")
-    assert "Santana e Pinheiros, de 17 a 28 graus" in spoken
-    assert "Pirituba e Tatuapé, de 17 a 29 graus" in spoken
-    assert "Sé e Itaquera, de 18 a 28 graus" in spoken
-    assert len(linhas(beats))==8 and len(cities)==8
-
+def test_six_regions_spoken_separately_with_all_eleven_visible(pauta):
+    pares=[(17,28),(17.6,28.9),(17.1,28.2),(17.9,28.1),
+           (19,30),(19.5,30.8),(21,32),(21,32),
+           (23,29),(24,30),(25,31)]
+    data=brief_com_faixas(pares)
+    old=deepcopy(data["cards"])
+    beats,cities=pauta(data)
+    chunks=resumos(beats)
+    assert len(chunks)==6
+    titles=[b["dados"]["titulo"] for b in chunks]
+    assert titles==["ZONA NORTE","CENTRO","ZONA OESTE","ZONA LESTE","ZONA SUL","LITORAL PAULISTA"]
+    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
+    assert chunks[0]["fala"]=="Na Zona Norte, Santana e Pirituba, de 17 a 28 graus."
+    assert chunks[1]["fala"].startswith("No Centro, Sé, de ")
+    assert chunks[-1]["fala"].startswith("No Litoral Paulista, ")
+    assert len(linhas(beats))==len(cities)==11
+    assert {x["nome"] for x in linhas(beats)}=={x["point"] for x in old}
+    assert data["cards"]==old
 
 @pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
-def test_all_eight_identical_are_still_eight_visible_lines(pauta):
-    beats,_=pauta(brief_com_faixas([(17.8,28.9)]*8))
-    summaries=[b for b in beats if b["tipo"]=="resumo"]
-    assert len(summaries)==1
-    assert summaries[0]["fala"].count("de 17 a 28 graus")==1
-    assert len(summaries[0]["dados"]["cidades"])==8
-
+def test_even_same_temperatures_never_merge_different_regions(pauta):
+    beats,cities=pauta(brief_com_faixas([(17,28)]*11))
+    chunks=resumos(beats)
+    assert len(chunks)==6 and len(cities)==11
+    assert sum(len(x["dados"]["cidades"]) for x in chunks)==11
+    assert sum("de 17 a 28 graus" in x["fala"] for x in chunks)==6
+    assert "Santana e Pirituba" in chunks[0]["fala"]
+    assert "Tatuapé e Itaquera" in chunks[3]["fala"]
+    assert "Caraguatatuba, Santos e Ilha Comprida" in chunks[5]["fala"]
 
 @pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
-def test_individual_temperature_pages_have_four_lines(pauta):
-    pairs=[(10+i,20+i) for i in range(8)]
-    beats,_=pauta(brief_com_faixas(pairs))
-    summaries=[b for b in beats if b["tipo"]=="resumo"]
-    assert [len(b["dados"]["cidades"]) for b in summaries]==[4,4]
+def test_different_temperatures_remain_individual_in_each_region(pauta):
+    pares=[(10+i,20+i) for i in range(11)]
+    beats,_=pauta(brief_com_faixas(pares))
+    chunks=resumos(beats)
+    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
+    assert chunks[0]["fala"].count("graus")==2
+    assert chunks[-1]["fala"].count("graus")==3
 
+@pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
+def test_missing_coast_blocks_video_instead_of_publishing_partial(pauta):
+    data=brief_com_faixas([(17,28)]*11)
+    data["cards"]=[c for c in data["cards"] if c["sector"]!="litoral_sul"]
+    with pytest.raises(ValueError,match="Boletim incompleto"):
+        pauta(data)
 
 def test_visual_separate_city_rows_and_attribute_for_highlights():
     from hyperframes.compor import cena_quadro
     p={"ceu":"sol","dur":30}
     scene={"id":"s2-quadro","batidas":[0]}
     beats=[{"dados":{"cidades":[{"nome":"Pirituba","min":17,"max":28},
-                                   {"nome":"Santo Amaro","min":17,"max":28}],
+                                  {"nome":"Santo Amaro","min":17,"max":28}],
                      "titulo":"TEMPERATURAS POR REGIÃO"}}]
     html=cena_quadro(p,scene,beats)
     assert 'data-cidade="Pirituba"' in html
     assert 'data-cidade="Santo Amaro"' in html
     assert 'class="qd-linha"' in html and html.count('class="qd-linha"')==2
     assert html.count("17°")==2 and html.count("28°")==2
-
 
 def test_helpers():
     assert juntar_nomes(["Sé"])=="Sé"
