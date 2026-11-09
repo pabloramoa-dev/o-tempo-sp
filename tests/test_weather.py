@@ -18,7 +18,7 @@ def test_parse_hoje_amanha():
     assert a['forecast_date']=='2026-11-08'
     assert b['forecast_date']=='2026-11-09'
     assert b['points'][0]['rain_peak_hour']=='16:00'
-    assert len(b['points'])==8
+    assert len(b['points'])==11
 
 def test_nao_aceitar_ponto_faltando():
     with pytest.raises(ValueError, match='parcial'):
@@ -30,7 +30,7 @@ def test_coletor_open_meteo_em_lote():
         def json(self): return [raw() for _ in locations(1)]
     class Session:
         def get(self, url, params, timeout):
-            assert len(params['latitude'].split(','))==8
+            assert len(params['latitude'].split(','))==11
             assert 'precipitation_sum' in params['daily']
             return Reply()
     assert len(collect(session=Session(), source='open_meteo')['points'])==8
@@ -97,4 +97,4 @@ def test_met_coleta_um_ponto_por_vez_com_user_agent():
         r = collect(session=Session(), source='met_no')
     finally:
         w.parse_met = original
-    assert len(calls) == 8 and len(r['points']) == 8
+    assert len(calls) == 11 and len(r['points']) == 11
