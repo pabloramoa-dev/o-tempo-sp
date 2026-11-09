@@ -19,9 +19,9 @@ def met_fixture():
         p['rain_mm'] = float(i) / 2
     return snap
 
-def test_8_cartoes_e_fonte():
+def test_11_cartoes_capital_e_litoral_e_fonte():
     b=summarise(fixture())
-    assert len(b['cards'])==8
+    assert len(b['cards'])==11
     assert 'SIMULADO' in b['caption']
     assert '@otemposp' not in b['script']
 
@@ -32,7 +32,7 @@ def test_met_usa_milimetros_e_credita_fonte():
     assert ' mm' in b['caption'] and '%' not in b['caption']
     assert 'milímetros' not in b['script']
     assert 'graus' in b['script']
-    assert b['wettest']['rain_mm'] == 3.5
+    assert b['wettest']['rain_mm'] == 5.0
 
 def test_met_sem_chuva():
     snap = met_fixture()
