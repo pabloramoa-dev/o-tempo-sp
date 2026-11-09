@@ -45,8 +45,17 @@ def pauta(brief):
     # preservando o CTA antes do quadro final da chuva.
     chuva = maior_chuva(cards, when)
     if chuva is not None:
+        # Somente o maior acumulado: nome, milímetros e fala no quadro FINAL.
         beats.append(beat("gancho", chuva["fala"], numero=f'{chuva["mm_fala"]} mm',
                           sub="MAIOR CHUVA PREVISTA", local=chuva["point"]))
+    elif all(c.get("rain_mm") is not None for c in cards):
+        # O boletim de hoje pode ter 0 mm em TODOS os oito locais. Sem este
+        # caso, a edição terminava no CTA, deixando a chuva sem explicação.
+        # Nunca inventar um "local mais chuvoso" se todos empataram em zero.
+        beats.append(beat("gancho",
+                          f"Nos oito locais acompanhados, não há chuva prevista {when}.",
+                          numero="0 mm", sub="SEM CHUVA PREVISTA",
+                          local="8 LOCAIS MONITORADOS"))
     return beats,cities
 
 def render_brief(brief,destination):

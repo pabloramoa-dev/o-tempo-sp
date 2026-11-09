@@ -35,10 +35,29 @@ def test_only_highest_rain_closes_video(pauta):
 
 
 @pytest.mark.parametrize("pauta", [pauta_producao, pauta_live])
-def test_dry_forecast_has_no_rain_spotlight(pauta):
-    beats, _ = pauta(brief([0] * 8))
+@pytest.mark.parametrize("quando", ["hoje", "amanhã"])
+def test_dry_forecast_closes_with_zero_mm_in_voice_and_screen(pauta, quando):
+    beats, _ = pauta(brief([0] * 8, quando))
+    assert beats[-2]["tipo"] == "cta"
+    assert beats[-1]["tipo"] == "gancho"
+    assert beats[-1]["fala"] == (
+        f"Nos oito locais acompanhados, não há chuva prevista {quando}."
+    )
+    assert beats[-1]["dados"] == {
+        "numero": "0 mm",
+        "sub": "SEM CHUVA PREVISTA",
+        "local": "8 LOCAIS MONITORADOS",
+    }
+    assert not any("milímetros" in b["fala"] for b in beats)
+
+
+@pytest.mark.parametrize("pauta", [pauta_producao, pauta_live])
+def test_no_mm_data_never_claims_dry_forecast(pauta):
+    data = brief([0] * 8)
+    for card in data["cards"]:
+        card["rain_mm"] = None
+    beats, _ = pauta(data)
     assert beats[-1]["tipo"] == "cta"
-    assert not any("milímetro" in b["fala"] for b in beats)
 
 
 def test_max_uses_raw_values_not_rounded_and_tie_is_stable():
