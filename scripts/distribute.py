@@ -77,7 +77,7 @@ def deliver(snap,brief,mp4,kind,live):
     if not cid:
         args={"media_type":kind,"upload_type":"resumable"}
         if kind=="REELS":
-            args.update(caption=brief["caption"],share_to_feed="true")
+            args.update(caption=brief["caption"],share_to_feed="true",thumb_offset="500")
         container=post(user+"/media",args)
         cid=container["id"]
         uri=container["uri"]

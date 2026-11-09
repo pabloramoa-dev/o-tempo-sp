@@ -30,14 +30,15 @@ def test_met_usa_milimetros_e_credita_fonte():
     assert b['rain_metric'] == 'mm'
     assert 'Dados: MET Norway' in b['caption']
     assert ' mm' in b['caption'] and '%' not in b['caption']
-    assert 'milímetros' in b['script']
+    assert 'milímetros' not in b['script']
+    assert 'graus' in b['script']
     assert b['wettest']['rain_mm'] == 3.5
 
 def test_met_sem_chuva():
     snap = met_fixture()
     for p in snap['points']:
         p['rain_mm'] = 0.0
-    assert 'Não há chuva prevista' in summarise(snap)['script']
+    assert 'chuva' not in summarise(snap)['script'].lower()
 
 def test_bloqueia_publicacao_automaticamente():
     with pytest.raises(RuntimeError, match='BLOQUEADA'):

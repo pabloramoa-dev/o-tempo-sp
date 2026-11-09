@@ -306,7 +306,7 @@ def cena_quadro(p, cena, bat):
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade">{esc(c["nome"].upper())}</div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
-   <div class="qd-metrics"><span>CHUVA <b>{metric(c, "prob_chuva", "%") if c.get("prob_chuva") is not None else metric(c, "chuva_mm", " mm", 1)}</b></span></div>
+
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
  <div class="qd-veu"></div>
@@ -403,6 +403,9 @@ def compor(p):
     cenas = p["cenas"]
     ap = APRESENTADOR[p["personagem"]]
     y, m, d = p["data"].split("-")
+    dia_capa = "HOJE" if p["personagem"] == "bira" else "AMANHÃ"
+    minima_capa = round(min(c["min"] for c in p["cidades"]))
+    maxima_capa = round(max(c["max"] for c in p["cidades"]))
     data_curta = f'{p["data_ext"].split(",")[0][:3]} {d}/{m}'
     cenas_html = "".join(FAB[c["tipo"]](p, c, bat) for c in cenas)
     ultima = cenas[-1]
@@ -458,6 +461,21 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .ab-w {{ display: block; }}
 .ab-w:last-child {{ color: {YEL}; }}
 .ab-mascote {{ position: absolute; top: 690px; left: 0; right: 0; display: flex; justify-content: center; }}
+/* ---------- capa para a grade: visível no primeiro frame ---------- */
+#cover-card {{ position:absolute;inset:0;z-index:348;pointer-events:none;
+  background:linear-gradient(180deg,rgba(9,27,47,.91) 0%,rgba(18,49,76,.9) 53%,rgba(10,30,48,.30) 100%); }}
+.cover-kicker {{ position:absolute;top:275px;left:72px;right:72px;display:flex;align-items:center;justify-content:center;
+  font-family:"BarlowC",sans-serif;font-size:58px;letter-spacing:3px;color:{YEL}; }}
+.cover-title {{ position:absolute;top:390px;left:58px;right:58px;text-align:center;
+  font-family:"BarlowC",sans-serif;font-size:156px;line-height:.94;color:#fff;text-shadow:0 9px 0 {PT}; }}
+.cover-day {{ position:absolute;top:800px;left:124px;right:124px;background:{YEL};color:{PT};
+  border:6px solid {PT};border-radius:22px;text-align:center;font-family:"BarlowC",sans-serif;font-size:86px; }}
+.cover-temps {{ position:absolute;top:985px;left:85px;right:85px;display:flex;justify-content:center;
+  gap:28px;font-family:"BarlowCB",sans-serif;font-size:62px;text-shadow:0 5px 0 {PT}; }}
+.cover-temps span {{ background:rgba(9,27,47,.85);border:4px solid #a9dfff;border-radius:20px;padding:16px 23px; }}
+.cover-temps strong {{ color:{YEL}; }}
+.cover-footer {{ position:absolute;top:1250px;right:70px;background:{INK};padding:8px 24px;border-radius:16px;
+  font-family:"BarlowCB",sans-serif;font-size:46px;color:#fff; }}
 /* ---------- número ---------- */
 .nu-veu {{ position: absolute; inset: 0; background-color: rgba(11,26,40,0.55); }}
 .nu-icone {{ position: absolute; top: 255px; left: 0; right: 0; display: flex; justify-content: center; }}
@@ -475,9 +493,9 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-head {{ display: flex; justify-content: space-between; align-items: center; font-family: "BarlowCB", sans-serif; font-size: 36px; color: {YEL}; letter-spacing: 3px; margin-bottom: 8px; }}
 .qd-cols {{ display: flex; gap: 62px; padding-right: 22px; }}
 .qd-cols b {{ font-weight: 700; }}
-.qd-linha {{ position: relative; height: 104px; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
+.qd-linha {{ position: relative; height: 88px; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
 .qd-barra {{ position:absolute;left:0;top:14px;width:8px;height:76px;background:{YEL};border-radius:5px; }}
-.qd-main {{ display:flex;align-items:center;justify-content:space-between;height:48px; }}
+.qd-main {{ display:flex;align-items:center;justify-content:space-between;height:68px; }}
 .qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;color:white;white-space:nowrap; }}
 .qd-cels {{ display:flex;gap:30px;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:82px;text-align:center; }}
@@ -535,6 +553,13 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 <div id="root" data-composition-id="main" data-start="0" data-duration="{dur}" data-width="{W}" data-height="{H}">
 
  <div id="palco">{cenas_html}</div>
+ <div id="cover-card" class="clip" data-start="0" data-duration="1.5" data-track-index="12">
+  <div class="cover-kicker">O TEMPO SP</div>
+  <div class="cover-title">PREVISÃO<br>DO TEMPO<br>SÃO PAULO</div>
+  <div class="cover-day">{esc(dia_capa)} · {d}/{m}</div>
+  <div class="cover-temps"><span>MÍN <strong>{minima_capa}°</strong></span><span>MÁX <strong>{maxima_capa}°</strong></span></div>
+  <div class="cover-footer">8 REGIÕES · @OTEMPOSP</div>
+ </div>
 
  <div id="hud" class="clip" data-start="0" data-duration="{dur}" data-track-index="2">
   <div class="hud-vivo"><span class="hud-ponto" id="hud-ponto"></span>{("PILOTO" if p["demo"] else "PREVISÃO")}</div>
@@ -577,7 +602,10 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   function q(id, sel) {{ return document.querySelector("#" + id + " " + sel); }}
   function qa(id, sel) {{ return document.querySelectorAll("#" + id + " " + sel); }}
 
-  // 1) TRANSIÇÕES entre cenas — receitas CSS do catálogo de transições do
+  // A capa existe desde o primeiro frame e sai após 1,5s.
+   tl.set("#cover-card", {{ opacity: 1 }}, 0);
+   tl.set("#cover-card", {{ opacity: 0 }}, 1.5);
+   // 1) TRANSIÇÕES entre cenas — receitas CSS do catálogo de transições do
   //    HyperFrames (glitch · whip pan · flash). CSS em vez de WebGL porque
   //    renderiza igual em qualquer máquina, inclusive no runner sem GPU.
   var tl = gsap.timeline({{ paused: true }});

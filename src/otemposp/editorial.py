@@ -33,19 +33,10 @@ def summarise(snapshot: dict, when: str = 'hoje') -> dict:
     coldest = min(cards, key=lambda p: p['min_c'])
     subject = 'hoje' if when == 'hoje' else 'amanhã'
     opening = f'O tempo em São Paulo {subject}, região por região!'
-    if use_pct:
-        rain_line = (f'A maior probabilidade diária de chuva na amostra é em {wettest["point"]}, '
-                     f'com {wettest["rain_pct"]:g} por cento. ')
-    elif wettest['rain_mm'] > 0:
-        rain_line = (f'O maior volume de chuva previsto na amostra é em {wettest["point"]}, '
-                     f'com {_mm(wettest["rain_mm"])} milímetros. ')
-    else:
-        rain_line = 'Não há chuva prevista nos pontos acompanhados. '
     commentary = (
         f'Entre os pontos acompanhados, a maior máxima prevista é em {hottest["point"]}, '
         f'com {hottest["max_c"]:g} graus. '
         f'A menor mínima aparece em {coldest["point"]}, com {coldest["min_c"]:g} graus. '
-        + rain_line +
         'Confira os oito setores na tela e compartilhe com alguém do seu bairro. '
         'A previsão é estimativa por ponto, não previsão por rua.'
     )

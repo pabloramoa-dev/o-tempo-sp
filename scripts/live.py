@@ -6,25 +6,32 @@ from src.otemposp.geo import sectors
 from scripts.produce import render_brief
 
 def pauta(brief):
-    cards=brief["cards"]
-    cities=[dict(nome=c["point"],min=c["min_c"],max=c["max_c"],chuva_mm=c["rain_mm"],prob_chuva=None) for c in cards]
-    hot,wet=brief["hottest"],brief["wettest"]
-    def beat(kind,text,**data):
-        return dict(tipo=kind,fala=text,legenda=text,dados=data)
-    morning=brief["when"]=="hoje"
-    beats=[beat("nenhum", ("Bom dia, São Paulo!" if morning else "Boa noite, São Paulo!")+
-                f" Veja a previsão para {brief['when']}, a partir das {brief['hora_inicio']} horas."),
-           beat("gancho",f"Em {hot['point']}, a máxima prevista é de {round(hot['max_c'])} graus.",
-                numero=f"{round(hot['max_c'])}°",sub="MAIOR MÁXIMA")]
-    amount=round(wet["rain_mm"])
-    chuva=(f"Em {wet['point']}, o acumulado previsto é de cerca de {amount} milímetros." if amount else
-           "Nos pontos acompanhados, o acumulado previsto fica abaixo de um milímetro.")
-    beats.append(beat("gancho",chuva,numero=f"{amount} mm",sub="VOLUME DE CHUVA"))
-    for group in (cities[:4],cities[4:]):
-        city=group[0]
-        beats.append(beat("resumo",f"Em {city['nome']}, mínima de {round(city['min'])} graus. Máxima de {round(city['max'])} graus.",cidades=group,titulo="PREVISÃO POR SETOR"))
-    beats.append(beat("cta","Conte pra gente de qual bairro você acompanha a previsão.",chamada="QUAL É O SEU BAIRRO?",sub="@otemposp"))
-    return beats,cities
+    """Narração curta: só temperaturas. Chuva permanece nos dados e na legenda."""
+    cards = brief["cards"]
+    cities = [dict(nome=c["point"], setor=c.get("short", ""),
+                   min=c["min_c"], max=c["max_c"], chuva_mm=c["rain_mm"],
+                   prob_chuva=None) for c in cards]
+    hot = brief["hottest"]
+
+    def beat(kind, text, **data):
+        return dict(tipo=kind, fala=text, legenda=text, dados=data)
+
+    morning = brief["when"] == "hoje"
+    beats = [
+        beat("nenhum", ("Bom dia, São Paulo! " if morning else "Boa noite, São Paulo! ")
+             + f"Confira as temperaturas de {brief['when']} por região."),
+        beat("gancho", f"Em {hot['point']}, a máxima chega a {round(hot['max_c'])} graus.",
+             numero=f"{round(hot['max_c'])}°", sub="MAIOR MÁXIMA"),
+    ]
+    for group in (cities[:4], cities[4:]):
+        fala = " ".join(
+            f"{x['nome']}: mínima de {round(x['min'])} e máxima de {round(x['max'])} graus."
+            for x in group
+        )
+        beats.append(beat("resumo", fala, cidades=group, titulo="TEMPERATURAS POR REGIÃO"))
+    beats.append(beat("cta", "Conte pra gente de qual bairro você acompanha a previsão.",
+                      chamada="QUAL É O SEU BAIRRO?", sub="@otemposp"))
+    return beats, cities
 
 def run(when):
     snap=collect(int(when=="amanhã"))
