@@ -1,0 +1,52 @@
+name: Prévia real 09-11-2026 — O Tempo SP
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/previa-real-09nov2026.yml'
+permissions:
+  contents: read
+jobs:
+  video-real-amanha:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-hyperframes
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Preparar dependências do renderizador
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
+          pip install -r requirements-voice.txt pytest
+      - name: Testar agrupamento de cidades e destaque de chuva
+        run: python -m pytest -q
+      - name: Gerar MP4 com dados reais da MET Norway — amanhã
+        run: python -m scripts.live "amanhã"
+      - name: Validar previsão para 09/11/2026 e mídia
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          brief=json.loads(Path("output/brief.json").read_text())
+          snapshot=json.loads(Path("output/snapshot.json").read_text())
+          assert brief["date"]=="2026-11-09", f"Data inesperada: {brief['date']}"
+          assert snapshot["is_fixture"] is False, "Dados simulados recusados"
+          assert len(brief["cards"])==8, "Faltam setores"
+          assert Path("output/bia.mp4").stat().st_size>100000, "MP4 vazio"
+          print("Previsão real de 09/11/2026 validada.")
+          PY
+          ffprobe -v error -show_entries format=duration,size -of json output/bia.mp4
+      - name: Disponibilizar MP4 para avaliação sem publicar no Instagram
+        uses: actions/upload-artifact@v4
+        with:
+          name: previa-real-sp-09nov2026
+          path: |
+            output/bia.mp4
+            output/bia.json
+            output/bia.txt
+            output/brief.json
+            output/snapshot.json
+          retention-days: 7
