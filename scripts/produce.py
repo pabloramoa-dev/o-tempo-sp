@@ -4,6 +4,18 @@ import sys
 from pathlib import Path
 from src.otemposp.editorial import summarise
 
+def rain_beat(beat, wet):
+    """% quando a fonte dá probabilidade (Open-Meteo); mm quando não dá (MET Norway)."""
+    if wet.get("rain_pct") is not None:
+        return beat("gancho", f"Em {wet['point']}, a chance de chuva é de {wet['rain_pct']:g} por cento.",
+                    numero=f"{wet['rain_pct']:g}%", sub="CHANCE DE CHUVA")
+    mm = f"{float(wet.get('rain_mm') or 0):g}".replace(".", ",")
+    if float(wet.get("rain_mm") or 0) > 0:
+        return beat("gancho", f"Em {wet['point']}, a previsão é de {mm} milímetros de chuva.",
+                    numero=f"{mm} mm", sub="CHUVA PREVISTA")
+    return beat("gancho", "Sem chuva prevista nos pontos acompanhados.",
+                numero="0 mm", sub="CHUVA PREVISTA")
+
 def pauta(brief):
     cards = brief["cards"]
     cities = [dict(nome=c["point"], setor=c["short"], min=c["min_c"], max=c["max_c"],
@@ -16,8 +28,7 @@ def pauta(brief):
                   (" Confira a previsão para amanhã." if when=="amanhã" else " Confira a previsão de hoje.")),
              beat("gancho", f"Em {hot['point']}, a máxima chega a {hot['max_c']:g} graus.",
                   numero=f"{hot['max_c']:g}°", sub="MAIOR MÁXIMA"),
-             beat("gancho", f"Em {wet['point']}, a chance de chuva é de {wet['rain_pct']:g} por cento.",
-                  numero=f"{wet['rain_pct']:g}%", sub="CHANCE DE CHUVA")]
+             rain_beat(beat, wet)]
     for i in (0, 4):
         rows=cities[i:i+4]
         fala=" ".join(f"{c['nome']}, de {c['min']:g} a {c['max']:g} graus." for c in rows)
