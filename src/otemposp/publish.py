@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone, timedelta
 from hashlib import sha256
 from pathlib import Path
+from .geo import sectors
 from zoneinfo import ZoneInfo
 import json
 import os
@@ -34,8 +35,8 @@ def guard(snapshot: dict, brief: dict, video_url: str):
     if not video_url.startswith('https://'):
         raise RuntimeError('Vídeo precisa estar hospedado em URL HTTPS pública')
     pts = snapshot.get('points', [])
-    if len({p['sector'] for p in pts}) != 8:
-        raise RuntimeError('Exigidas oito regiões com dados válidos')
+    if len(pts) != len(sectors()) or {p['sector'] for p in pts} != set(sectors()):
+        raise RuntimeError('Exigida cobertura integral da capital e do litoral')
     try:
         fetched = datetime.fromisoformat(snapshot['fetched_at'].replace('Z','+00:00'))
     except (KeyError, ValueError) as e:
