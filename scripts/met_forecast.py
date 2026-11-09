@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import requests
-from src.otemposp.geo import locations
+from src.otemposp.geo import daily_locations
 
 ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 LOCAL = ZoneInfo("America/Sao_Paulo")
@@ -23,12 +23,17 @@ def daily(row, day):
                 start_hour=hours[0][0].hour)
 
 def collect(offset):
+    if offset not in (0, 1):
+        raise ValueError("Somente os turnos de hoje e amanhã são permitidos")
     now = datetime.now(timezone.utc)
-    day = now.astimezone(LOCAL).date() + timedelta(days=offset)
+    publication_day = now.astimezone(LOCAL).date()
+    day = publication_day + timedelta(days=offset)
+    turn = "amanhã" if offset else "hoje"
+    chosen = daily_locations(publication_day, turn)
     points = []
     with requests.Session() as session:
         session.headers["User-Agent"] = "OTempoSP/1.0 (https://www.instagram.com/otemposp/)"
-        for point in locations(1):
+        for point in chosen:
             response = session.get(ENDPOINT, params={"lat":point["latitude"],"lon":point["longitude"]},timeout=45)
             response.raise_for_status()
             values = daily(response.json(),day)
@@ -38,5 +43,6 @@ def collect(offset):
     if len({p["start_hour"] for p in points}) != 1:
         raise ValueError("Os setores têm períodos diferentes")
     return dict(brand="@otemposp",is_fixture=False,forecast_date=day.isoformat(),
+                rotation_publication_day=publication_day.isoformat(),rotation_turn=turn,
                 fetched_at=now.isoformat(),source=SOURCE,source_url=ENDPOINT,
                 api_endpoint=ENDPOINT,points=points)
