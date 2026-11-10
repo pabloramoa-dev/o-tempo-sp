@@ -498,18 +498,18 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-check {{ display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; border-radius: 35px; background-color: {TEAL}; border: 5px solid {PT}; font-size: 44px; font-weight: 900; color: #ffffff; }}
 .qd-titulo {{ font-family: "BarlowC", sans-serif; font-size: 66px; color: #ffffff; text-shadow: 0 5px 0 {PT}; }}
 .qd-painel {{ position: absolute; top: 350px; left: 44px; right: 44px; padding: 20px 28px 22px; background-color: #0e1d2c; border: 6px solid {PT}; border-radius: 26px; box-shadow: 0 16px 0 {PT}; }}
-.qd-head {{ position:relative; display:flex;align-items:center; padding-left:22px; font-family:"BarlowCB",sans-serif; font-size:36px;color:{YEL};letter-spacing:3px;margin-bottom:8px;min-height:45px; }}
-.qd-chuva-titulo {{ position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;text-align:center; }}
-.qd-cols {{ margin-left:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:190px;letter-spacing:0;text-align:center; }}
+.qd-head {{ display:grid;grid-template-columns:270px 310px minmax(0,1fr) 190px;gap:8px;align-items:center; padding-left:22px; font-family:"BarlowCB",sans-serif; font-size:36px;color:{YEL};letter-spacing:3px;margin-bottom:8px;min-height:45px; }}
+.qd-chuva-titulo {{ grid-column:2;justify-self:center;white-space:nowrap;text-align:center; }}
+.qd-cols {{ grid-column:4;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:190px;letter-spacing:0;text-align:center; }}
 .qd-cols b {{ font-weight: 700; }}
 .qd-linha {{ position: relative; min-height: 92px; height: auto; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
 .qd-barra {{ position:absolute;left:0;top:14px;width:8px;height:76px;background:{YEL};border-radius:5px; }}
-.qd-main {{ position:relative;display:flex;align-items:center;min-height:68px;height:auto;gap:8px; }}
-.qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;flex:0 1 30%;min-width:0; }}
-/* O volume ocupa posição fixa no centro; nunca acompanha a animação de destaque. */
-.qd-chuva {{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:300px;text-align:center;white-space:nowrap;font-family:"BarlowC",sans-serif;font-size:42px;color:#ffffff;line-height:1.1; }}
+.qd-main {{ display:grid;grid-template-columns:270px 310px minmax(0,1fr) 190px;gap:8px;align-items:center;min-height:68px;height:auto; }}
+.qd-cidade {{ grid-column:1;font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;min-width:0; }}
+/* CHUVA em fluxo normal: grid impede saltos verticais entre cenas. */
+.qd-chuva {{ grid-column:2;justify-self:center;text-align:center;white-space:nowrap;font-family:"BarlowC",sans-serif;font-size:42px;color:#ffffff;line-height:1.1; }}
 .qd-chuva b {{ font-size:42px;color:#ffffff;font-weight:800; }}
-.qd-cels {{ display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;gap:8px;width:190px;margin-left:auto;font-family:"BarlowC",sans-serif;font-size:44px; }}
+.qd-cels {{ grid-column:4;display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;gap:8px;width:190px;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:auto;text-align:center; }}
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}
@@ -517,9 +517,10 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-compacto {{ padding:12px 24px 16px; }}
 .qd-compacto .qd-head {{ font-size:30px; margin-bottom:4px; }}
 .qd-compacto .qd-linha {{ min-height:62px; padding:2px 0 2px 16px; border-top-width:2px; }}
+.qd-compacto .qd-head,.qd-compacto .qd-main {{ grid-template-columns:270px 280px minmax(0,1fr) 160px; }}
 .qd-compacto .qd-main {{ min-height:54px; }}
 .qd-compacto .qd-cols,.qd-compacto .qd-cels {{ width:160px; }}
-.qd-compacto .qd-chuva {{ font-size:34px;width:270px; }}
+.qd-compacto .qd-chuva {{ font-size:34px; }}
 .qd-compacto .qd-chuva b {{ font-size:34px; }}
 .qd-compacto .qd-cidade {{ font-size:35px !important; }}
 .qd-compacto .qd-cels {{ font-size:37px; }}
