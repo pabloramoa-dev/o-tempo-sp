@@ -87,8 +87,16 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
         run: |
+          set -euo pipefail
           if [ "$LIVE" = "true" ]; then
-            python -m scripts.distribute live
+            if [ "$TURNO" = "hoje" ]; then video="output/bira.mp4"; else video="output/bia.mp4"; fi
+            test -s "$video"
+            visibilidade="$(gh api "repos/$GITHUB_REPOSITORY" --jq .visibility)"
+            test "$visibilidade" = public || { echo "Repositorio privado: a Meta nao pode baixar o video."; exit 1; }
+            tag="boletim-sp-$GITHUB_RUN_ID"
+            gh release create "$tag" "$video" --title "$tag" --notes "Boletim diario @otemposp"
+            REEL_PUBLIC_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$(basename "$video")" python -m scripts.publicar_via_url
+            gh release delete "$tag" --cleanup-tag --yes
           else
-            python -m scripts.distribute validar
+            python -m scripts.publicar_via_url --validar
           fi
