@@ -1,6 +1,7 @@
-"""Recuperacao do boletim de hoje via video_url publica e recibo idempotente."""
+"""Publicacao dos dois turnos de SP via video_url publica e recibo idempotente."""
 import json
 import os
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -16,10 +17,11 @@ from src.otemposp.geo import sectors
 
 def conferir_previsao(snap, brief):
     agora = datetime.now(timezone.utc)
-    dia = agora.astimezone(ZoneInfo("America/Sao_Paulo")).date()
+    dia = (agora.astimezone(ZoneInfo("America/Sao_Paulo")).date()
+           + timedelta(days=int(brief.get("when") == "amanhã")))
     obtido = datetime.fromisoformat(snap["fetched_at"])
     idade = agora - obtido
-    if (brief["when"] != "hoje" or
+    if (brief.get("when") not in ("hoje", "amanhã") or
         brief["date"] != dia.isoformat() or
         snap.get("forecast_date") != brief["date"] or
         snap.get("source_url") != ENDPOINT or
@@ -35,6 +37,13 @@ def publicar():
     brief = json.loads(Path("output/brief.json").read_text(encoding="utf-8"))
     snap = json.loads(Path("output/snapshot.json").read_text(encoding="utf-8"))
     conferir_previsao(snap, brief)
+    quando = brief["when"]
+    video = Path("output/bira.mp4" if quando == "hoje" else "output/bia.mp4")
+    if not video.is_file() or video.stat().st_size < 1000000:
+        raise ValueError("MP4 ausente ou incompleto")
+    if len(sys.argv) > 1 and sys.argv[1] == "--validar":
+        print("Boletim validado localmente:", quando, brief["date"], video)
+        return
     url = os.environ["REEL_PUBLIC_URL"].strip()
     parsed = urlparse(url)
     if (parsed.scheme != "https" or parsed.netloc != "github.com" or
@@ -61,12 +70,10 @@ def publicar():
     if conta.get("username", "").lower() != "otemposp":
         raise ValueError("Conta de destino inesperada")
 
-    dia = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
-    video = Path("output/bira.mp4")
-    if not video.is_file() or video.stat().st_size < 1000000:
-        raise ValueError("MP4 ausente ou incompleto")
-    for tipo in ("REELS", "STORIES"):
-        recibo = Receipt(f"{dia}-hoje-{tipo}")
+    dia = (datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+           + timedelta(days=int(quando == "amanhã")))
+    for tipo in (("REELS", "STORIES") if quando == "hoje" else ("REELS",)):
+        recibo = Receipt(f"{dia}-{quando}-{tipo}")
         if recibo.data.get("media_id"):
             media_id = str(recibo.data["media_id"])
             detalhes = get(media_id, "id,media_type,permalink" if tipo == "REELS"
