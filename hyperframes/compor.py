@@ -300,15 +300,22 @@ def cena_quadro(p, cena, bat):
             return "—"
         return f"{v:.{decimals}f}".replace(".", ",") + unit
     linhas = []
+    volumes = []
     compacto = len(cidades) > 4
-    for c in cidades:
+    for indice, c in enumerate(cidades):
+        # Cada volume tem coordenadas fixas no painel, sem reflow de texto.
+        volume = metric(c, "chuva_mm", " mm", decimals=1)
+        x = 458 if compacto else 483
+        y = (92 + indice * 62) if compacto else (119 + indice * 92)
+        volumes.append(f'<text class="qd-chuva-valor" x="{x}" y="{y}" text-anchor="middle" '
+                       f'dominant-baseline="middle" font-family="BarlowC, sans-serif" font-size="{34 if compacto else 42}" '
+                       f'font-weight="800" fill="#ffffff">VOLUME {esc(volume)}</text>')
         nome = c["nome"].upper()
         fonte = 35 if compacto else (42 if len(nome) <= 19 else 37)
         linhas.append(f'''
   <div class="qd-linha" data-cidade="{esc(c["nome"])}">
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade" style="font-size:{fonte}px">{esc(nome)}</div>
-   <div class="qd-chuva">VOLUME <b>{metric(c, "chuva_mm", " mm", decimals=1)}</b></div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
@@ -317,6 +324,7 @@ def cena_quadro(p, cena, bat):
  <div class="qd-painel{" qd-compacto" if compacto else ""}">
   <div class="qd-head"><span>POR SETOR</span><span class="qd-chuva-titulo">CHUVA</span><span class="qd-cols"><b>MÍN</b><b>MÁX</b></span></div>
   {"".join(linhas)}
+  <svg class="qd-chuva-sobreposta" viewBox="0 0 992 700" width="992" height="700" xmlns="http://www.w3.org/2000/svg" aria-label="Volume de chuva em milímetros">{"".join(volumes)}</svg>
   <div class="qd-dicas" data-qa-bounds="true">{esc(" · ".join(p.get("dicas_praticas", [])))}</div>
  </div>'''
     return _scene(cena, p, NAVY2, miolo)
@@ -507,8 +515,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-main {{ display:grid;grid-template-columns:270px 310px minmax(0,1fr) 190px;gap:8px;align-items:center;min-height:68px;height:auto; }}
 .qd-cidade {{ grid-column:1;font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;min-width:0; }}
 /* CHUVA em fluxo normal: grid impede saltos verticais entre cenas. */
-.qd-chuva {{ grid-column:2;justify-self:center;text-align:center;white-space:nowrap;font-family:"BarlowC",sans-serif;font-size:42px;color:#ffffff;line-height:1.1; }}
-.qd-chuva b {{ font-size:42px;color:#ffffff;font-weight:800; }}
+.qd-chuva-sobreposta {{ position:absolute;top:0;left:0;width:992px;height:700px;overflow:visible;pointer-events:none; }}
 .qd-cels {{ grid-column:4;display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;gap:8px;width:190px;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:auto;text-align:center; }}
 .qd-min {{ color:#9fd8ff; }}
@@ -520,8 +527,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-compacto .qd-head,.qd-compacto .qd-main {{ grid-template-columns:270px 280px minmax(0,1fr) 160px; }}
 .qd-compacto .qd-main {{ min-height:54px; }}
 .qd-compacto .qd-cols,.qd-compacto .qd-cels {{ width:160px; }}
-.qd-compacto .qd-chuva {{ font-size:34px; }}
-.qd-compacto .qd-chuva b {{ font-size:34px; }}
+.qd-compacto .qd-head {{ padding-left:16px; }}
 .qd-compacto .qd-cidade {{ font-size:35px !important; }}
 .qd-compacto .qd-cels {{ font-size:37px; }}
 .qd-compacto .qd-cels span {{ width:72px; }}
