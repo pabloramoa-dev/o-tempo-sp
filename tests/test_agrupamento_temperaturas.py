@@ -101,11 +101,15 @@ def test_volume_chuva_ausente_nao_e_convertido_em_zero_e_painel_compacto():
     assert html.count("VOLUME <b>1,4 mm</b>")==4
 
 
-def test_volume_chuva_tem_posicao_vertical_explicita():
-    """Evita o salto de uma linha quando o renderizador anima quadros regionais."""
+def test_volume_chuva_fica_no_grid_sem_saltos_entre_regioes():
+    """Chuva no fluxo da linha e cabecalho na mesma coluna evita deslocamento de cenas."""
     from pathlib import Path
     source=(Path(__file__).resolve().parents[1]/"hyperframes"/"compor.py").read_text()
-    assert ".qd-chuva {{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)" in source
+    grid="grid-template-columns:270px 310px minmax(0,1fr) 190px"
+    assert source.count(grid)==2
+    assert ".qd-chuva {{ grid-column:2;" in source
+    assert ".qd-chuva-titulo {{ grid-column:2;" in source
+    assert ".qd-chuva {{ position:absolute" not in source
     assert 'tl.fromTo(qa(id, ".qd-linha"), {{ opacity: 0 }}' in source
 
 
