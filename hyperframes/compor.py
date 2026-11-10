@@ -308,6 +308,7 @@ def cena_quadro(p, cena, bat):
   <div class="qd-linha" data-cidade="{esc(c["nome"])}">
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade" style="font-size:{fonte}px">{esc(nome)}</div>
+   <div class="qd-chuva">VOLUME <b>{metric(c, "chuva_mm", " mm", decimals=1)}</b></div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd" + cena["id"])}
@@ -502,8 +503,10 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-cols b {{ font-weight: 700; }}
 .qd-linha {{ position: relative; min-height: 92px; height: auto; padding: 8px 0 8px 22px; border-top: 3px solid #22364a; }}
 .qd-barra {{ position:absolute;left:0;top:14px;width:8px;height:76px;background:{YEL};border-radius:5px; }}
-.qd-main {{ display:flex;align-items:center;justify-content:space-between;min-height:68px;height:auto;gap:14px; }}
+.qd-main {{ display:grid;grid-template-columns:minmax(0,1fr) 220px 190px;align-items:center;min-height:68px;height:auto;column-gap:8px; }}
 .qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;flex:1;min-width:0; }}
+.qd-chuva {{ justify-self:center;white-space:nowrap;font-family:"BarlowCB",sans-serif;font-size:28px;color:#b9ccdd;line-height:1.1; }}
+.qd-chuva b {{ font-size:30px;color:#ffffff; }}
 .qd-cels {{ display:flex;flex-shrink:0;gap:8px;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:82px;text-align:center; }}
 .qd-min {{ color:#9fd8ff; }}
@@ -512,7 +515,9 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-compacto {{ padding:12px 24px 16px; }}
 .qd-compacto .qd-head {{ font-size:30px; margin-bottom:4px; }}
 .qd-compacto .qd-linha {{ min-height:62px; padding:2px 0 2px 16px; border-top-width:2px; }}
-.qd-compacto .qd-main {{ min-height:54px; }}
+.qd-compacto .qd-main {{ grid-template-columns:minmax(0,1fr) 200px 160px;min-height:54px; }}
+.qd-compacto .qd-chuva {{ font-size:24px; }}
+.qd-compacto .qd-chuva b {{ font-size:26px; }}
 .qd-compacto .qd-cidade {{ font-size:35px !important; }}
 .qd-compacto .qd-cels {{ font-size:37px; }}
 .qd-compacto .qd-cels span {{ width:72px; }}
