@@ -82,6 +82,8 @@ def test_visual_separate_city_rows_and_attribute_for_highlights():
     assert 'class="qd-linha"' in html and html.count('class="qd-linha"')==2
     assert html.count("17°")==2 and html.count("28°")==2
     assert html.count('class="qd-chuva"')==2
+    assert 'class="qd-chuva-titulo">CHUVA</span>' in html
+    assert 'class="qd-cols"><b>MÍN</b><b>MÁX</b></span>' in html
     assert "VOLUME <b>0,0 mm</b>" in html
     assert "VOLUME <b>6,3 mm</b>" in html
 
