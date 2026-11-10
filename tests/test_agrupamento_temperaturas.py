@@ -101,6 +101,14 @@ def test_volume_chuva_ausente_nao_e_convertido_em_zero_e_painel_compacto():
     assert html.count("VOLUME <b>1,4 mm</b>")==4
 
 
+def test_volume_chuva_tem_posicao_vertical_explicita():
+    """Evita o salto de uma linha quando o renderizador anima quadros regionais."""
+    from pathlib import Path
+    source=(Path(__file__).resolve().parents[1]/"hyperframes"/"compor.py").read_text()
+    assert ".qd-chuva {{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)" in source
+    assert 'tl.fromTo(qa(id, ".qd-linha"), {{ opacity: 0 }}' in source
+
+
 def test_helpers():
     assert juntar_nomes(["Sé"])=="Sé"
     assert juntar_nomes(["Sé","Pirituba"])=="Sé e Pirituba"
