@@ -81,11 +81,12 @@ def test_visual_separate_city_rows_and_attribute_for_highlights():
     assert 'data-cidade="Santo Amaro"' in html
     assert 'class="qd-linha"' in html and html.count('class="qd-linha"')==2
     assert html.count("17°")==2 and html.count("28°")==2
-    assert html.count('class="qd-chuva"')==2
+    assert html.count('class="qd-chuva-valor"')==2
     assert 'class="qd-chuva-titulo">CHUVA</span>' in html
     assert 'class="qd-cols"><b>MÍN</b><b>MÁX</b></span>' in html
-    assert "VOLUME <b>0,0 mm</b>" in html
-    assert "VOLUME <b>6,3 mm</b>" in html
+    assert "VOLUME 0,0 mm" in html
+    assert "VOLUME 6,3 mm" in html
+    assert 'class="qd-chuva-sobreposta"' in html
 
 def test_volume_chuva_ausente_nao_e_convertido_em_zero_e_painel_compacto():
     from hyperframes.compor import cena_quadro
@@ -96,9 +97,9 @@ def test_volume_chuva_ausente_nao_e_convertido_em_zero_e_painel_compacto():
     beats=[{"dados":{"cidades":cidades,"titulo":"ZONA NORTE"}}]
     html=cena_quadro(p,scene,beats)
     assert 'class="qd-painel qd-compacto"' in html
-    assert html.count('class="qd-chuva"')==5
-    assert "VOLUME <b>—</b>" in html
-    assert html.count("VOLUME <b>1,4 mm</b>")==4
+    assert html.count('class="qd-chuva-valor"')==5
+    assert "VOLUME —" in html
+    assert html.count("VOLUME 1,4 mm")==4
 
 
 def test_volume_chuva_fica_no_grid_sem_saltos_entre_regioes():
@@ -107,9 +108,10 @@ def test_volume_chuva_fica_no_grid_sem_saltos_entre_regioes():
     source=(Path(__file__).resolve().parents[1]/"hyperframes"/"compor.py").read_text()
     grid="grid-template-columns:270px 310px minmax(0,1fr) 190px"
     assert source.count(grid)==2
-    assert ".qd-chuva {{ grid-column:2;" in source
+    assert 'class="qd-chuva-sobreposta"' in source
+    assert 'class="qd-chuva-valor"' in source
     assert ".qd-chuva-titulo {{ grid-column:2;" in source
-    assert ".qd-chuva {{ position:absolute" not in source
+    assert ".qd-chuva {{ grid-column:2;" not in source
     assert 'tl.fromTo(qa(id, ".qd-linha"), {{ opacity: 0 }}' in source
 
 
