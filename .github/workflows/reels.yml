@@ -7,6 +7,8 @@ on:
     - cron: '41 8 * * *'
     - cron: '13 20 * * *'
     - cron: '41 20 * * *'
+  repository_dispatch:
+    types: [boletim_hoje, boletim_amanha]
   push:
     branches: [main]
     paths: ['.github/workflows/reels.yml', 'scripts/distribute.py', 'scripts/met_forecast.py', 'scripts/live.py']
@@ -32,8 +34,8 @@ jobs:
       group: instagram-otemposp
       cancel-in-progress: false
     env:
-      TURNO: ${{ inputs.turno || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109') && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *') && 'hoje') || 'amanhã' }}
-      LIVE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' || github.event.head_commit.message == 'PUBLICAR_AGORA_OTEMPOSP_20261109')) }}
+      TURNO: ${{ inputs.turno || (github.event_name == 'repository_dispatch' && github.event.action == 'boletim_hoje' && 'hoje') || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || (github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261110')) && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *') && 'hoje') || 'amanhã' }}
+      LIVE: ${{ github.event_name == 'schedule' || github.event_name == 'repository_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' || (github.event.head_commit.message == 'PUBLICAR_AGORA_OTEMPOSP_20261109' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261110'))) }}
       REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' && 'chuva-final-bira-20261109' || github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
     steps:
       - uses: actions/checkout@v4
@@ -56,21 +58,29 @@ jobs:
             output/*.json
             output/*.txt
           retention-days: 7
-      - name: Aguardar horário do boletim
-        if: github.event_name == 'schedule'
+      - name: Validar janela do boletim (agendamento)
+        id: janela
+        if: github.event_name == 'schedule' || github.event_name == 'repository_dispatch'
         run: |
           python - <<'PY'
           from datetime import datetime
           from zoneinfo import ZoneInfo
-          import os,time
-          now=datetime.now(ZoneInfo("America/Sao_Paulo"))
-          target=now.replace(hour=6 if os.environ["TURNO"]=="hoje" else 18,minute=0,second=0,microsecond=0)
-          delay=(target-now).total_seconds()
-          if delay < -7200 or delay > 3600:
-              raise SystemExit("Fora da janela do boletim")
-          time.sleep(max(0,delay))
+          import os, time
+          now = datetime.now(ZoneInfo("America/Sao_Paulo"))
+          target = now.replace(hour=6 if os.environ["TURNO"] == "hoje" else 18,
+                               minute=0, second=0, microsecond=0)
+          delay = (target - now).total_seconds()
+          if delay < -5400 or delay > 3600:
+              print(f"Agendamento fora da janela: {now:%H:%M}, turno={os.environ['TURNO']}. Publicacao cancelada para evitar previsao vencida.")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+                  output.write("ok=false\\n".replace("\\n", "\n"))
+          else:
+              time.sleep(max(0, delay))
+              with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+                  output.write("ok=true\\n".replace("\\n", "\n"))
           PY
       - name: Entregar MP4 à Meta
+        if: github.event_name != 'schedule' && github.event_name != 'repository_dispatch' || steps.janela.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
