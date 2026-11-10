@@ -73,14 +73,31 @@ def test_visual_separate_city_rows_and_attribute_for_highlights():
     from hyperframes.compor import cena_quadro
     p={"ceu":"sol","dur":30}
     scene={"id":"s2-quadro","batidas":[0]}
-    beats=[{"dados":{"cidades":[{"nome":"Pirituba","min":17,"max":28},
-                                  {"nome":"Santo Amaro","min":17,"max":28}],
+    beats=[{"dados":{"cidades":[{"nome":"Pirituba","min":17,"max":28,"chuva_mm":0.0},
+                                  {"nome":"Santo Amaro","min":17,"max":28,"chuva_mm":6.3}],
                      "titulo":"TEMPERATURAS POR REGIÃO"}}]
     html=cena_quadro(p,scene,beats)
     assert 'data-cidade="Pirituba"' in html
     assert 'data-cidade="Santo Amaro"' in html
     assert 'class="qd-linha"' in html and html.count('class="qd-linha"')==2
     assert html.count("17°")==2 and html.count("28°")==2
+    assert html.count('class="qd-chuva"')==2
+    assert "VOLUME <b>0,0 mm</b>" in html
+    assert "VOLUME <b>6,3 mm</b>" in html
+
+def test_volume_chuva_ausente_nao_e_convertido_em_zero_e_painel_compacto():
+    from hyperframes.compor import cena_quadro
+    p={"ceu":"sol","dur":30}
+    scene={"id":"s3-quadro","batidas":[0]}
+    cidades=[{"nome":f"Bairro {i}","min":15,"max":22,"chuva_mm":None if i==0 else 1.4}
+             for i in range(5)]
+    beats=[{"dados":{"cidades":cidades,"titulo":"ZONA NORTE"}}]
+    html=cena_quadro(p,scene,beats)
+    assert 'class="qd-painel qd-compacto"' in html
+    assert html.count('class="qd-chuva"')==5
+    assert "VOLUME <b>—</b>" in html
+    assert html.count("VOLUME <b>1,4 mm</b>")==4
+
 
 def test_helpers():
     assert juntar_nomes(["Sé"])=="Sé"
