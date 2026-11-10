@@ -122,17 +122,37 @@ def deliver(snap,brief,mp4,kind,live):
         uri=container["uri"]
         if urlparse(uri).hostname!="rupload.facebook.com" or urlparse(uri).scheme!="https":
             raise ValueError("Destino de upload inválido")
-        for attempt in range(2):
-            with mp4.open("rb") as video:
-                uploaded=requests.post(uri,data=video,headers={"Authorization":"OAuth "+token,
-                    "offset":"0","file_size":str(mp4.stat().st_size),"Content-Type":"application/octet-stream"},
-                    timeout=180,allow_redirects=False)
-            if uploaded.ok:
-                break
-            if attempt == 0 and uploaded.status_code in (400,408,429,500,502,503,504):
+        # A Meta invalida alguns containers apos um upload interrompido.
+        # Cada repeticao deve pedir um container NOVO, nunca reutilizar a uri.
+        for attempt in range(3):
+            if attempt:
+                container = post(user+"/media", args)
+                cid, uri = container["id"], container["uri"]
+                if urlparse(uri).hostname != "rupload.facebook.com" or urlparse(uri).scheme != "https":
+                    raise ValueError("Destino de upload inválido")
+            try:
+                with mp4.open("rb") as video:
+                    uploaded = requests.post(
+                        uri, data=video,
+                        headers={"Authorization": "OAuth " + token, "offset": "0",
+                                 "file_size": str(mp4.stat().st_size),
+                                 "Content-Type": "application/octet-stream"},
+                        timeout=180, allow_redirects=False)
+            except requests.RequestException as exc:
+                print(f"Upload falhou por rede (tentativa {attempt+1}/3): {type(exc).__name__}")
+                if attempt == 2:
+                    raise
                 time.sleep(5)
                 continue
-            result(uploaded)
+            if uploaded.ok:
+                break
+            try:
+                result(uploaded)
+            except RuntimeError as exc:
+                print(f"Upload recusado (tentativa {attempt+1}/3): {exc}")
+                if attempt == 2 or uploaded.status_code not in (400,408,429,500,502,503,504):
+                    raise
+                time.sleep(5)
         if receipt:
             receipt.data={"container":cid}
             receipt.save()
