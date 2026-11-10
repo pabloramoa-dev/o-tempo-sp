@@ -507,7 +507,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-main {{ position:relative;display:flex;align-items:center;min-height:68px;height:auto;gap:8px; }}
 .qd-cidade {{ font-family:"BarlowC",sans-serif;font-size:42px;line-height:1.03;color:white;white-space:normal;overflow-wrap:break-word;flex:0 1 30%;min-width:0; }}
 /* O volume ocupa posição fixa no centro; nunca acompanha a animação de destaque. */
-.qd-chuva {{ position:absolute;left:50%;transform:translateX(-50%);width:300px;text-align:center;white-space:nowrap;font-family:"BarlowC",sans-serif;font-size:42px;color:#ffffff;line-height:1.1; }}
+.qd-chuva {{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:300px;text-align:center;white-space:nowrap;font-family:"BarlowC",sans-serif;font-size:42px;color:#ffffff;line-height:1.1; }}
 .qd-chuva b {{ font-size:42px;color:#ffffff;font-weight:800; }}
 .qd-cels {{ display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;gap:8px;width:190px;margin-left:auto;font-family:"BarlowC",sans-serif;font-size:44px; }}
 .qd-cels span {{ width:auto;text-align:center; }}
