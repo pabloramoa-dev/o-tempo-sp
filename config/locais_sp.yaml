@@ -120,6 +120,40 @@ locations:
   - {id: ipiranga, name: Ipiranga, sector: sul_1, latitude: -23.5850, longitude: -46.6070, tier: 2, spatial_fit: medio}
   - {id: campo_limpo, name: Campo Limpo, sector: sul_2, latitude: -23.6510, longitude: -46.7660, tier: 2, spatial_fit: medio}
 
+  # Mais bairros representativos para ampliar o rodízio de cada setor da capital.
+  - {id: tucuruvi, name: 'Tucuruvi', sector: norte_1, latitude: -23.4810, longitude: -46.6070, tier: 2, spatial_fit: medio}
+  - {id: jacana, name: 'Jaçanã', sector: norte_1, latitude: -23.4660, longitude: -46.5820, tier: 2, spatial_fit: medio}
+  - {id: vila_guilherme, name: 'Vila Guilherme', sector: norte_1, latitude: -23.5160, longitude: -46.6100, tier: 2, spatial_fit: medio}
+  - {id: mandaqui, name: 'Mandaqui', sector: norte_1, latitude: -23.4750, longitude: -46.6360, tier: 2, spatial_fit: medio}
+  - {id: casa_verde, name: 'Casa Verde', sector: norte_2, latitude: -23.5120, longitude: -46.6610, tier: 2, spatial_fit: medio}
+  - {id: brasilandia, name: 'Brasilândia', sector: norte_2, latitude: -23.4730, longitude: -46.6900, tier: 2, spatial_fit: medio}
+  - {id: jaragua, name: 'Jaraguá', sector: norte_2, latitude: -23.4560, longitude: -46.7460, tier: 2, spatial_fit: medio}
+  - {id: limao, name: 'Limão', sector: norte_2, latitude: -23.5110, longitude: -46.6750, tier: 2, spatial_fit: medio}
+  - {id: bela_vista, name: 'Bela Vista', sector: centro, latitude: -23.5600, longitude: -46.6450, tier: 2, spatial_fit: medio}
+  - {id: santa_cecilia, name: 'Santa Cecília', sector: centro, latitude: -23.5380, longitude: -46.6500, tier: 2, spatial_fit: medio}
+  - {id: consolacao, name: 'Consolação', sector: centro, latitude: -23.5550, longitude: -46.6590, tier: 2, spatial_fit: medio}
+  - {id: bom_retiro, name: 'Bom Retiro', sector: centro, latitude: -23.5260, longitude: -46.6330, tier: 2, spatial_fit: medio}
+  - {id: vila_madalena, name: 'Vila Madalena', sector: oeste, latitude: -23.5520, longitude: -46.6890, tier: 2, spatial_fit: medio}
+  - {id: perdizes, name: 'Perdizes', sector: oeste, latitude: -23.5350, longitude: -46.6730, tier: 2, spatial_fit: medio}
+  - {id: barra_funda, name: 'Barra Funda', sector: oeste, latitude: -23.5280, longitude: -46.6660, tier: 2, spatial_fit: medio}
+  - {id: jaguare, name: 'Jaguaré', sector: oeste, latitude: -23.5500, longitude: -46.7440, tier: 2, spatial_fit: medio}
+  - {id: vila_prudente, name: 'Vila Prudente', sector: leste_1, latitude: -23.5830, longitude: -46.5760, tier: 2, spatial_fit: medio}
+  - {id: sapopemba, name: 'Sapopemba', sector: leste_1, latitude: -23.6080, longitude: -46.5080, tier: 2, spatial_fit: medio}
+  - {id: aricanduva, name: 'Aricanduva', sector: leste_1, latitude: -23.5610, longitude: -46.5160, tier: 2, spatial_fit: medio}
+  - {id: ermelino_matarazzo, name: 'Ermelino Matarazzo', sector: leste_1, latitude: -23.4950, longitude: -46.4770, tier: 2, spatial_fit: medio}
+  - {id: sao_miguel_paulista, name: 'São Miguel Paulista', sector: leste_2, latitude: -23.4950, longitude: -46.4430, tier: 2, spatial_fit: medio}
+  - {id: itaim_paulista, name: 'Itaim Paulista', sector: leste_2, latitude: -23.4990, longitude: -46.3990, tier: 2, spatial_fit: medio}
+  - {id: sao_mateus, name: 'São Mateus', sector: leste_2, latitude: -23.5950, longitude: -46.4790, tier: 2, spatial_fit: medio}
+  - {id: jose_bonifacio, name: 'José Bonifácio', sector: leste_2, latitude: -23.5660, longitude: -46.4300, tier: 2, spatial_fit: medio}
+  - {id: saude, name: 'Saúde', sector: sul_1, latitude: -23.6090, longitude: -46.6390, tier: 2, spatial_fit: medio}
+  - {id: moema, name: 'Moema', sector: sul_1, latitude: -23.6000, longitude: -46.6630, tier: 2, spatial_fit: medio}
+  - {id: cursino, name: 'Cursino', sector: sul_1, latitude: -23.6280, longitude: -46.6160, tier: 2, spatial_fit: medio}
+  - {id: sacoma, name: 'Sacomã', sector: sul_1, latitude: -23.6090, longitude: -46.5950, tier: 2, spatial_fit: medio}
+  - {id: capao_redondo, name: 'Capão Redondo', sector: sul_2, latitude: -23.6610, longitude: -46.7640, tier: 2, spatial_fit: medio}
+  - {id: m_boi_mirim, name: 'M'Boi Mirim', sector: sul_2, latitude: -23.7050, longitude: -46.7690, tier: 2, spatial_fit: medio}
+  - {id: cidade_ademar, name: 'Cidade Ademar', sector: sul_2, latitude: -23.6720, longitude: -46.6600, tier: 2, spatial_fit: medio}
+  - {id: interlagos, name: 'Interlagos', sector: sul_2, latitude: -23.6830, longitude: -46.6880, tier: 2, spatial_fit: medio}
+
   # Municipios do litoral para alternar as localidades citadas no Reels.
   - {id: ubatuba, name: Ubatuba, sector: litoral_norte, latitude: -23.4330, longitude: -45.0830, tier: 2, spatial_fit: medio}
   - {id: sao_sebastiao, name: São Sebastião, sector: litoral_norte, latitude: -23.8060, longitude: -45.4040, tier: 2, spatial_fit: medio}
@@ -129,3 +163,9 @@ locations:
   - {id: peruibe, name: Peruíbe, sector: litoral_baixada, latitude: -24.3200, longitude: -47.0000, tier: 2, spatial_fit: medio}
   - {id: iguape, name: Iguape, sector: litoral_sul, latitude: -24.7080, longitude: -47.5550, tier: 2, spatial_fit: medio}
   - {id: cananeia, name: Cananéia, sector: litoral_sul, latitude: -25.0140, longitude: -47.9250, tier: 2, spatial_fit: medio}
+
+  # Mais municípios da Baixada Santista, além de Santos, Guarujá, Praia Grande e Peruíbe.
+  - {id: sao_vicente, name: 'São Vicente', sector: litoral_baixada, latitude: -23.9640, longitude: -46.3910, tier: 2, spatial_fit: medio}
+  - {id: bertioga, name: 'Bertioga', sector: litoral_baixada, latitude: -23.8500, longitude: -46.1400, tier: 2, spatial_fit: medio}
+  - {id: mongagua, name: 'Mongaguá', sector: litoral_baixada, latitude: -24.0900, longitude: -46.6200, tier: 2, spatial_fit: medio}
+  - {id: itanhaem, name: 'Itanhaém', sector: litoral_baixada, latitude: -24.1840, longitude: -46.7890, tier: 2, spatial_fit: medio}
