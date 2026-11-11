@@ -76,6 +76,7 @@ jobs:
               print(f"Agendamento fora da janela: {now:%H:%M}, turno={os.environ['TURNO']}. Publicacao cancelada para evitar previsao vencida.")
               with open(os.environ["GITHUB_OUTPUT"], "a") as output:
                   output.write("ok=false\\n".replace("\\n", "\n"))
+              raise SystemExit("Falha: agendamento fora da janela; nenhum Reel foi publicado.")
           else:
               time.sleep(max(0, delay))
               with open(os.environ["GITHUB_OUTPUT"], "a") as output:

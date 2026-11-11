@@ -57,5 +57,5 @@ def test_recusa_buraco_de_horas_ao_inves_de_inventar_dados():
 def test_amanha_exige_dia_completo():
     day = datetime.now(met_forecast.LOCAL).date() + timedelta(days=1)
     data = make_payload(day, 6)
-    with pytest.raises(ValueError, match="incompleta|24 horas"):
+    with pytest.raises(ValueError, match="incompleta|24 horas|período comum"):
         met_forecast.daily(data, day, start_hour=0)
