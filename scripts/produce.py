@@ -31,8 +31,7 @@ def pauta(brief):
     hot = brief["hottest"]
     def beat(tipo, fala, **dados):
         return dict(tipo=tipo, fala=fala, legenda=fala, dados=dados)
-    beats = [beat("nenhum", ("Bom dia, São Paulo!" if when=="hoje" else "Boa noite, São Paulo!") +
-                  (" Confira a previsão para amanhã." if when=="amanhã" else " Confira a previsão de hoje.")),
+    beats = [beat("nenhum", "Veja a previsão na sua cidade."),
              beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
                   numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA")]
     for chave, titulo in REGIOES:
