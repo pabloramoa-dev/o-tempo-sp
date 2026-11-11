@@ -106,3 +106,55 @@ def test_coleta_do_pipeline_usa_os_bairros_escolhidos_para_a_data(monkeypatch):
         assert [p["name"] for p in snap["points"]] == [p["name"] for p in chosen]
         assert len(snap["points"]) == 11
         assert all(p["rain_mm"] >= 0 for p in snap["points"])
+
+
+def test_distribuicao_equilibrada_no_catalogo_ampliado():
+    """Todos os locais precisam aparecer; nenhum bairro pode monopolizar a região."""
+    from collections import Counter
+
+    pool = {key: {p["id"] for p in locations(2) if p["sector"] == key}
+            for key in sectors()}
+    capital = [k for k in sectors() if sectors()[k]["group"] != "litoral"]
+    assert all(len(pool[k]) >= 7 for k in capital)
+    assert len(pool["litoral_norte"]) >= 4
+    assert len(pool["litoral_baixada"]) >= 8
+    assert len(pool["litoral_sul"]) >= 3
+
+    inicio = date(2026, 11, 9)
+    for turno in ("hoje", "amanhã"):
+        frequencia = {key: Counter() for key in sectors()}
+        ultimos = {key: [] for key in sectors()}
+        for i in range(35):
+            escolhidos = _ids(daily_locations(inicio + timedelta(days=i), turno))
+            assert set(escolhidos) == set(pool)
+            for key, atual in escolhidos.items():
+                assert atual in pool[key]
+                # Nunca repetir localidade enquanto há outras disponíveis
+                # nas últimas até cinco edições do mesmo horário.
+                janela = min(5, len(pool[key]) - 1)
+                assert atual not in ultimos[key][-janela:], (turno, key, i)
+                ultimos[key].append(atual)
+                frequencia[key][atual] += 1
+        for key in sectors():
+            assert set(frequencia[key]) == pool[key], (turno, key)
+            valores = list(frequencia[key].values())
+            assert max(valores) - min(valores) <= 1, (turno, key)
+
+
+def test_nomes_sorteados_aparecem_na_fala_e_no_quadro():
+    """A pauta das duas edições deve usar o rodízio em vez dos pontos âncora."""
+    from scripts.produce import pauta
+
+    for turno in ("hoje", "amanhã"):
+        pontos = daily_locations(date(2026, 11, 11), turno)
+        cards = [dict(point=p["name"], sector=p["sector"],
+                      short=sectors()[p["sector"]]["short"],
+                      min_c=18, max_c=27, rain_pct=None, rain_mm=0)
+                 for p in pontos]
+        brief = dict(when=turno, cards=cards, hottest=cards[0],
+                     wettest=cards[0], is_fixture=True)
+        beats, exibidas = pauta(brief)
+        falas = " ".join(b["fala"] for b in beats if b["tipo"] == "resumo")
+        nomes = {p["name"] for p in pontos}
+        assert {c["nome"] for c in exibidas} == nomes
+        assert all(nome in falas for nome in nomes)
