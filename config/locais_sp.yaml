@@ -150,7 +150,7 @@ locations:
   - {id: cursino, name: 'Cursino', sector: sul_1, latitude: -23.6280, longitude: -46.6160, tier: 2, spatial_fit: medio}
   - {id: sacoma, name: 'Sacomã', sector: sul_1, latitude: -23.6090, longitude: -46.5950, tier: 2, spatial_fit: medio}
   - {id: capao_redondo, name: 'Capão Redondo', sector: sul_2, latitude: -23.6610, longitude: -46.7640, tier: 2, spatial_fit: medio}
-  - {id: m_boi_mirim, name: 'M'Boi Mirim', sector: sul_2, latitude: -23.7050, longitude: -46.7690, tier: 2, spatial_fit: medio}
+  - {id: m_boi_mirim, name: "M\u0027Boi Mirim", sector: sul_2, latitude: -23.7050, longitude: -46.7690, tier: 2, spatial_fit: medio}
   - {id: cidade_ademar, name: 'Cidade Ademar', sector: sul_2, latitude: -23.6720, longitude: -46.6600, tier: 2, spatial_fit: medio}
   - {id: interlagos, name: 'Interlagos', sector: sul_2, latitude: -23.6830, longitude: -46.6880, tier: 2, spatial_fit: medio}
 
