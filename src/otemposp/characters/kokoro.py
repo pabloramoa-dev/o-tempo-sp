@@ -79,10 +79,18 @@ def resample_44100(s, sr):
     return np.interp(x, xp, s).astype(np.float32)
 
 
+def estilo(modelo, voz):
+    """Compatibilidade com o Previsão RJ: mistura vetores Kokoro com pesos."""
+    if "+" not in voz:
+        return voz
+    termos = [termo.split(":") for termo in voz.split("+")]
+    return sum(modelo.get_voice_style(nome) * float(peso) for nome, peso in termos)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("roteiro", help="txt: uma batida de narração por linha")
-    ap.add_argument("--voz", default="pm_alex", help="pm_alex | pm_santa | pf_dora")
+    ap.add_argument("--voz", default="pm_alex", help="voz Kokoro simples ou mistura ponderada igual ao RJ")
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--gap", type=float, default=0.35, help="silêncio entre batidas (s)")
     ap.add_argument("--out", default="narracao.wav")
@@ -104,7 +112,7 @@ def main():
     segs = []
     t = 0.0
     for i, txt in enumerate(linhas):
-        s, sr = k.create(txt, voice=a.voz, speed=a.speed, lang="pt-br")
+        s, sr = k.create(txt, voice=estilo(k, a.voz), speed=a.speed, lang="pt-br")
         s = resample_44100(np.asarray(s, dtype=np.float32), sr)
         ini = t
         buf.append(s); buf.append(gap)
