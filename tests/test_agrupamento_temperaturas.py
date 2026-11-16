@@ -35,7 +35,7 @@ def test_six_regions_spoken_separately_with_all_eleven_visible(pauta):
     titles=[b["dados"]["titulo"] for b in chunks]
     assert titles==["ZONA NORTE","CENTRO","ZONA OESTE","ZONA LESTE","ZONA SUL","LITORAL PAULISTA"]
     assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
-    assert chunks[0]["fala"]=="Zona Norte: Pirituba, 28 graus."
+    assert chunks[0]["fala"]=="Zona Norte: Santana, 28 graus."
     assert chunks[1]["fala"].startswith("Centro: Sé, ")
     assert chunks[-1]["fala"].startswith("Litoral Paulista: ")
     assert len(linhas(beats))==len(cities)==11
