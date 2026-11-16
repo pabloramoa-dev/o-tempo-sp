@@ -15,6 +15,16 @@ def verificar(pacote, probe):
         erros.append("Direção diferente do total de falas")
     if pacote.get("personagem") not in {"bira", "bia"}:
         erros.append("Personagem fora do elenco diário")
+    if not pacote.get("demo"):
+        if batidas and batidas[0].get("tipo") != "gancho":
+            erros.append("Reel sem gancho meteorológico no primeiro quadro")
+        if batidas and batidas[-1].get("tipo") != "cta":
+            erros.append("Convite de compartilhamento não está no encerramento")
+        if sum(b.get("tipo") == "cta" for b in batidas) != 1:
+            erros.append("Reel deve ter um único CTA")
+        if len(pacote.get("cidades", [])) != 11:
+            erros.append("Reel deve apresentar as onze localidades verificadas")
+
     for i, b in enumerate(batidas):
         if not str(b.get("fala", "")).strip():
             erros.append(f"Fala {i} vazia")
