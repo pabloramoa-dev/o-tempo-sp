@@ -4,6 +4,10 @@ on:
     branches: [main]
     paths:
       - 'hyperframes/compor.py'
+      - 'hyperframes/gerar_hf.py'
+      - 'src/otemposp/characters/kokoro.py'
+      - 'tests/test_vozes_iguais_rj.py'
+      - 'config/brand.yaml'
       - '.github/workflows/previa-chuva-real.yml'
   workflow_dispatch:
 permissions:
