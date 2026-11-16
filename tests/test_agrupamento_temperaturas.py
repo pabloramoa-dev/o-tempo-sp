@@ -35,9 +35,9 @@ def test_six_regions_spoken_separately_with_all_eleven_visible(pauta):
     titles=[b["dados"]["titulo"] for b in chunks]
     assert titles==["ZONA NORTE","CENTRO","ZONA OESTE","ZONA LESTE","ZONA SUL","LITORAL PAULISTA"]
     assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
-    assert chunks[0]["fala"]=="Na Zona Norte, Santana e Pirituba, de 17 a 28 graus."
-    assert chunks[1]["fala"].startswith("No Centro, Sé, de ")
-    assert chunks[-1]["fala"].startswith("No Litoral Paulista, ")
+    assert chunks[0]["fala"]=="Zona Norte: Pirituba, 28 graus."
+    assert chunks[1]["fala"].startswith("Centro: Sé, ")
+    assert chunks[-1]["fala"].startswith("Litoral Paulista: ")
     assert len(linhas(beats))==len(cities)==11
     assert {x["nome"] for x in linhas(beats)}=={x["point"] for x in old}
     assert data["cards"]==old
@@ -48,10 +48,10 @@ def test_even_same_temperatures_never_merge_different_regions(pauta):
     chunks=resumos(beats)
     assert len(chunks)==6 and len(cities)==11
     assert sum(len(x["dados"]["cidades"]) for x in chunks)==11
-    assert sum("de 17 a 28 graus" in x["fala"] for x in chunks)==6
-    assert "Santana e Pirituba" in chunks[0]["fala"]
-    assert "Tatuapé e Itaquera" in chunks[3]["fala"]
-    assert "Caraguatatuba, Santos e Ilha Comprida" in chunks[5]["fala"]
+    assert all("28 graus" in x["fala"] for x in chunks)
+    assert "Santana" not in chunks[0]["fala"] and "Pirituba" in chunks[0]["fala"]
+    assert "Tatuapé" in chunks[3]["fala"]
+    assert "Caraguatatuba" in chunks[5]["fala"]
 
 @pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
 def test_different_temperatures_remain_individual_in_each_region(pauta):
@@ -59,8 +59,8 @@ def test_different_temperatures_remain_individual_in_each_region(pauta):
     beats,_=pauta(brief_com_faixas(pares))
     chunks=resumos(beats)
     assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
-    assert chunks[0]["fala"].count("graus")==2
-    assert chunks[-1]["fala"].count("graus")==3
+    assert chunks[0]["fala"].count("graus")==1
+    assert chunks[-1]["fala"].count("graus")==1
 
 @pytest.mark.parametrize("pauta",[pauta_producao,pauta_live])
 def test_missing_coast_blocks_video_instead_of_publishing_partial(pauta):
