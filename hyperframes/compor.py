@@ -363,7 +363,7 @@ def cena_cta(p, cena, bat):
     chamada = d.get("chamada") or b["legenda"].split(".")[0].strip().upper()
     miolo = f'''<div class="cta-fundo"></div>
  <div class="cta-bloco" id="cta-b1">
-  <div class="cta-mascote">{nuvem_rj_svg(230)}</div>
+  <div class="cta-mascote"><span style="display:inline-flex;align-items:center;justify-content:center;border:6px solid #fff;border-radius:50%;width:210px;height:210px;font-size:116px;font-weight:900;color:#fff;letter-spacing:-8px">SP</span></div>
   <div class="cta-chamada" style="font-size:{100 if len(chamada) <= 26 else 82}px">{esc(chamada)}</div>
   <div class="cta-sub">{esc(d.get("sub", "Previsão todo dia às 6h e às 18h"))}</div>
  </div>'''
@@ -622,8 +622,8 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
  <div id="glitch" class="clip" data-start="0" data-duration="{dur}" data-track-index="11"></div>
 
  <audio id="aud-voz" src="assets/audio/narracao.wav" data-start="0" data-duration="{dur}" data-track-index="20" data-volume="1"></audio>
- <audio id="aud-trilha" src="assets/audio/trilha.wav" data-start="0" data-duration="{dur}" data-track-index="21" data-volume="0.14"></audio>
- <audio id="aud-whoosh" src="assets/audio/whoosh.wav" data-start="0" data-duration="{dur}" data-track-index="22" data-volume="0.32"></audio>
+ <audio id="aud-trilha" src="assets/audio/trilha.wav" data-start="0" data-duration="{dur}" data-track-index="21" data-volume="0"></audio>
+ <audio id="aud-whoosh" src="assets/audio/whoosh.wav" data-start="0" data-duration="{dur}" data-track-index="22" data-volume="0"></audio>
 </div>
 
 <script>
