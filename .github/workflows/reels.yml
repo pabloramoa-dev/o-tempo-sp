@@ -11,9 +11,6 @@ on:
     - cron: '10 21 * * *' # 18h10 BRT: terceira tentativa automática
   repository_dispatch:
     types: [boletim_hoje, boletim_amanha]
-  push:
-    branches: [main]
-    paths: ['.github/workflows/reels.yml', 'scripts/distribute.py', 'scripts/met_forecast.py', 'scripts/live.py']
   workflow_dispatch:
     inputs:
       turno:
@@ -36,9 +33,9 @@ jobs:
       group: instagram-otemposp
       cancel-in-progress: false
     env:
-      TURNO: ${{ inputs.turno || (github.event_name == 'repository_dispatch' && github.event.action == 'boletim_hoje' && 'hoje') || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || (github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' || (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261110' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261111'))) && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *' || github.event.schedule == '10 9 * * *') && 'hoje') || 'amanhã' }}
-      LIVE: ${{ github.event_name == 'schedule' || github.event_name == 'repository_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.publicar) || (github.event_name == 'push' && (github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261109' || github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' || (github.event.head_commit.message == 'PUBLICAR_AGORA_OTEMPOSP_20261109' || (github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261110' || github.event.head_commit.message == 'PUBLICAR_HOJE_OTEMPOSP_20261111')))) }}
-      REEL_REPUBLICACAO: ${{ github.event_name == 'push' && github.event.head_commit.message == 'REPUBLICAR_HOJE_CHUVA_OTEMPOSP_20261109' && 'chuva-final-bira-20261109' || github.event.head_commit.message == 'PUBLICAR_REVISAO_OTEMPOSP_20261108' && 'revisao-capa-temp-20261108' || '' }}
+      TURNO: ${{ inputs.turno || (github.event_name == 'repository_dispatch' && github.event.action == 'boletim_hoje' && 'hoje') || (github.event_name == 'schedule' && (github.event.schedule == '13 8 * * *' || github.event.schedule == '41 8 * * *' || github.event.schedule == '10 9 * * *') && 'hoje') || 'amanhã' }}
+      LIVE: ${{ (github.event_name == 'schedule' || github.event_name == 'repository_dispatch') && vars.SP_AUTOMATION_ENABLED != 'false' || (github.event_name == 'workflow_dispatch' && inputs.publicar) }}
+      REEL_REPUBLICACAO: ''
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,6 +47,10 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng
       - run: pip install -r requirements-voice.txt pytest
       - run: python -m pytest -q
+      - name: Segurança editorial e sintaxe Python
+        run: |
+          python -m compileall -q scripts src hyperframes tests
+          python -m pytest -q tests/test_destaque_chuva.py tests/test_agrupamento_temperaturas.py
       - name: Gerar edição com previsão real
         run: python -m scripts.live "$TURNO"
       - uses: actions/upload-artifact@v4
