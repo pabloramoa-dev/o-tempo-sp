@@ -31,23 +31,26 @@ def pauta(brief):
     hot = brief["hottest"]
     def beat(tipo, fala, **dados):
         return dict(tipo=tipo, fala=fala, legenda=fala, dados=dados)
-    beats = [beat("nenhum", "Veja a previsão na sua cidade."),
-             beat("gancho", f"Em {hot['point']}, a máxima chega a {graus_inteiros(hot['max_c'])} graus.",
-                  numero=f"{graus_inteiros(hot['max_c'])}°", sub="MAIOR MÁXIMA")]
+    chuva = maior_chuva(cards, when)
+    # A primeira fala é um fato local verificável, e não uma apresentação genérica.
+    # O destaque de chuva continua reservado à parte final do vídeo.
+    beats = [beat("gancho",
+                  f"{hot['point']}: {graus_inteiros(hot['max_c'])} graus {when}.",
+                  numero=f"{graus_inteiros(hot['max_c'])}°",
+                  sub="MAIOR MÁXIMA", local=hot["point"])]
     for chave, titulo in REGIOES:
         locais = [c for c in cities if c["regiao"] == chave]
         if not locais:
             raise ValueError(f"Região ausente do roteiro: {titulo}")
         # Agrupar temperaturas repetidas só DENTRO da região; todos os
         # nomes continuam aparecendo em linhas individuais.
+        # Todas as localidades seguem visíveis; uma fala curta por região.
+        # A região continua independente das demais e usa dado da sua localidade.
         faixas = agrupar_cidades_por_faixa(locais)
-        fala = f"Na {titulo}, " if chave not in ("centro", "litoral") else f"No {titulo}, "
-        fala += " ".join(frase_faixa(g) for g in faixas)
+        pico = max(locais, key=lambda item: item["max"])
+        fala = f"{titulo}: {pico['nome']}, {pico['max']} graus."
         beats.append(beat("resumo", fala, cidades=locais, grupos_falados=faixas,
                           titulo=titulo.upper()))
-    beats.append(beat("cta", "Siga O Tempo SP e conte de qual bairro ou cidade você acompanha a previsão.",
-                      chamada="DE ONDE VOCÊ ASSISTE?", sub="@otemposp"))
-    chuva = maior_chuva(cards, when)
     if chuva is not None:
         beats.append(beat("gancho", chuva["fala"], numero=f'{chuva["mm_fala"]} mm',
                           sub="MAIOR CHUVA PREVISTA", local=chuva["point"]))
@@ -57,6 +60,12 @@ def pauta(brief):
                           f"Nos {numero_extenso(n)} locais acompanhados, não há chuva prevista {when}.",
                           numero="0 mm", sub="SEM CHUVA PREVISTA",
                           local=f"{n} LOCAIS MONITORADOS"))
+    # Depois da informação útil, apenas um convite de compartilhamento.
+    destino = chuva["point"] if chuva else hot["point"]
+    chamada = (f"Manda pra quem mora em {destino} e precisa ver essa previsão."
+               if chuva else f"Manda pra quem mora em {destino} conferir a previsão.")
+    beats.append(beat("cta", chamada, chamada="ENVIE A PREVISÃO",
+                      sub=f"@otemposp • {destino}"))
     return beats,cities
 
 def render_brief(brief,destination):
