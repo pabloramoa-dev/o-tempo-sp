@@ -20,12 +20,13 @@ def test_only_highest_rain_closes_video(pauta):
     data = brief([1,3,2,4,5.7,4.1,0,1,0,0,0])
     prev = copy.deepcopy(data)
     beats, cities = pauta(data)
-    assert beats[-1]["tipo"] == "gancho"
-    assert beats[-1]["fala"] == "Tatuapé poderá ter até 6 milímetros de chuva amanhã."
-    assert beats[-1]["dados"]["numero"] == "6 mm"
-    assert beats[-1]["dados"]["local"] == "Tatuapé"
-    assert beats[-2]["tipo"] == "cta"
-    assert len([b for b in beats if "chuva" in b["fala"].lower()]) == 1
+    assert beats[-2]["tipo"] == "gancho"
+    assert beats[-2]["fala"] == "Tatuapé poderá ter até 6 milímetros de chuva amanhã."
+    assert beats[-2]["dados"]["numero"] == "6 mm"
+    assert beats[-2]["dados"]["local"] == "Tatuapé"
+    assert beats[-1]["tipo"] == "cta"
+    assert len([b for b in beats if b["tipo"] == "cta"]) == 1
+    assert beats[-1]["fala"].startswith("Manda pra quem mora em Tatuapé")
     assert data == prev
     assert len(cities) == 11
 
@@ -35,8 +36,8 @@ def test_dry_forecast_closes_with_zero_mm_in_voice_and_screen(pauta, quando):
     beats, _ = pauta(brief([0]*11,quando))
     assert beats[-2]["tipo"] == "cta"
     assert beats[-1]["tipo"] == "gancho"
-    assert beats[-1]["fala"] == f"Nos onze locais acompanhados, não há chuva prevista {quando}."
-    assert beats[-1]["dados"] == {"numero":"0 mm","sub":"SEM CHUVA PREVISTA","local":"11 LOCAIS MONITORADOS"}
+    assert beats[-2]["fala"] == f"Nos onze locais acompanhados, não há chuva prevista {quando}."
+    assert beats[-2]["dados"] == {"numero":"0 mm","sub":"SEM CHUVA PREVISTA","local":"11 LOCAIS MONITORADOS"}
     assert not any("milímetros" in b["fala"] for b in beats)
 
 @pytest.mark.parametrize("pauta", [pauta_producao,pauta_live])
