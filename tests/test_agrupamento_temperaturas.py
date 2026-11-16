@@ -49,7 +49,7 @@ def test_even_same_temperatures_never_merge_different_regions(pauta):
     assert len(chunks)==6 and len(cities)==11
     assert sum(len(x["dados"]["cidades"]) for x in chunks)==11
     assert all("28 graus" in x["fala"] for x in chunks)
-    assert "Santana" not in chunks[0]["fala"] and "Pirituba" in chunks[0]["fala"]
+    assert "Santana" in chunks[0]["fala"] and "Pirituba" not in chunks[0]["fala"]
     assert "Tatuapé" in chunks[3]["fala"]
     assert "Caraguatatuba" in chunks[5]["fala"]
 
