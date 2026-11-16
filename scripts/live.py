@@ -23,8 +23,22 @@ def run(when):
     caption+=f"\n\nFonte: {SOURCE}. Valores calculados a partir da previsão horária. #OTempoSP #SaoPaulo"
     brief=dict(when=when,date=snap["forecast_date"],is_fixture=False,hora_inicio=hour,cards=cards,caption=caption,
                hottest=max(cards,key=lambda c:c["max_c"]),wettest=max(cards,key=lambda c:c["rain_mm"]))
+    # Primeira linha local para busca e identificação, sem alterar dados da MET.
+    principal = brief["hottest"]
+    brief["caption"] = (f"{principal['point']}: {graus_inteiros(principal['max_c'])} graus {when}!\n"
+                        + brief["caption"])
+    batidas, _ = pauta_de_producao(brief)
+    editorial = {
+        "previsao": brief["date"], "turno": when,
+        "fonte": SOURCE, "local_abertura": principal["point"],
+        "gancho": batidas[0]["fala"], "cta": batidas[-1]["fala"],
+        "maior_chuva": (batidas[-2]["fala"] if batidas[-2]["tipo"] == "gancho" else None),
+        "cidades_visiveis": len(cards),
+        "regioes": len({sectors()[c["sector"]]["group"] for c in cards}),
+        "criterio": "maior_maxima_verificada; um destaque de chuva; CTA unico"
+    }
     out=Path("output");out.mkdir(exist_ok=True)
-    for name,value in (("snapshot",snap),("brief",brief)):
+    for name,value in (("snapshot",snap),("brief",brief),("editorial",editorial)):
         (out/f"{name}.json").write_text(json.dumps(value,ensure_ascii=False))
     render_brief(brief,out/("bira.mp4" if when=="hoje" else "bia.mp4"))
 
