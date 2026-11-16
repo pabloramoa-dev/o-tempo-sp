@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'hyperframes/compor.py'
+      - '.github/workflows/previa-chuva-real.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +23,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg espeak-ng libcairo2-dev libpango1.0-dev pkg-config
           pip install -r requirements-voice.txt pytest
+      - name: Testar todo o roteiro novo e a tabela
+        run: python -m pytest -q
       - name: Testar tabela e dados de chuva
         run: python -m pytest -q tests/test_agrupamento_temperaturas.py tests/test_destaque_chuva.py
       - name: Gerar vídeo de amanhã usando previsão real MET Norway
@@ -56,5 +59,8 @@ jobs:
             output/bia.txt
             output/brief.json
             output/snapshot.json
+            output/editorial.json
+            output/bia.quality.json
+            output/bia.layout.json
           if-no-files-found: warn
-          retention-days: 3
+          retention-days: 7
