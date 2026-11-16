@@ -47,3 +47,30 @@ próprio nem inferir crescimento de seguidores somente pela semelhança visual.
 Para medir resultado são necessários insights reais de alcance, retenção,
 compartilhamentos e seguidores por Reel, antes e depois das alterações.
 
+
+
+## Vozes de Bira e Bia — mesmos presets do Previsão RJ
+
+O gerador de áudio do @otemposp utiliza Kokoro ONNX v1.0, com a mesma
+função de combinação ponderada de estilos usada no @previsaorj.
+Os presets abaixo foram conferidos em
+`previsao-rj/src/previsao_rj/render/characters/pipeline.py` e aplicados em
+`hyperframes/gerar_hf.py`:
+
+| Personagem | Mistura de voz | Velocidade | Pausa entre falas |
+| --- | --- | --- | --- |
+| Bira | `pm_alex:0.82+pm_santa:0.18` | 1.04 | 0.22 s |
+| Bia | `pf_dora:0.85+af_heart:0.15` | 1.02 | 0.24 s |
+
+O filtro de narração também é o mesmo:
+`highpass=f=80,acompressor=threshold=-18dB:ratio=2:attack=8:release=180,volume=1.1`.
+
+O arquivo `src/otemposp/characters/kokoro.py` interpreta a mistura com
+`get_voice_style` do Kokoro e aplica a mesma proporção de estilos antes da
+síntese. Os testes `tests/test_vozes_iguais_rj.py` travam esses parâmetros
+contra alterações involuntárias. Esta configuração reproduz os parâmetros de
+voz do RJ; o resultado audível ainda depende do texto, versão dos modelos e
+execução do render.
+
+A trilha e os ruídos de transição do SP continuam mudos por decisão editorial
+anterior; somente a voz do apresentador fica audível.
