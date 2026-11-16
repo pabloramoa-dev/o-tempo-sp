@@ -34,8 +34,8 @@ def test_only_highest_rain_closes_video(pauta):
 @pytest.mark.parametrize("quando",["hoje","amanhã"])
 def test_dry_forecast_closes_with_zero_mm_in_voice_and_screen(pauta, quando):
     beats, _ = pauta(brief([0]*11,quando))
-    assert beats[-2]["tipo"] == "cta"
-    assert beats[-1]["tipo"] == "gancho"
+    assert beats[-1]["tipo"] == "cta"
+    assert beats[-2]["tipo"] == "gancho"
     assert beats[-2]["fala"] == f"Nos onze locais acompanhados, não há chuva prevista {quando}."
     assert beats[-2]["dados"] == {"numero":"0 mm","sub":"SEM CHUVA PREVISTA","local":"11 LOCAIS MONITORADOS"}
     assert not any("milímetros" in b["fala"] for b in beats)
