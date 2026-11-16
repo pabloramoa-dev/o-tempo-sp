@@ -21,7 +21,12 @@ sys.path.insert(0, str(RAIZ))
 sys.path.insert(0, str(AQUI))
 
 from src.otemposp.characters.amplitude import gerar_cues  # noqa: E402
-PRESETS = {"bira":dict(voice="pm_alex",speed=1.04,gap=.22),"bia":dict(voice="pf_dora",speed=1.02,gap=.24)}  # noqa: E402
+# Mesmos presets de Bira e Bia de src/previsao_rj/render/characters/pipeline.py.
+# Isolamento: os modelos sao baixados localmente; nenhum dado ou segredo vem do RJ.
+PRESETS = {
+    "bira": dict(voice="pm_alex:0.82+pm_santa:0.18", pitch=1.0, speed=1.04, gap=0.22),
+    "bia": dict(voice="pf_dora:0.85+af_heart:0.15", pitch=1.0, speed=1.02, gap=0.24),
+}
 from src.otemposp.characters import director as DIRECAO
 from src.otemposp.characters import quality_direction as QA_DIRECAO
 
