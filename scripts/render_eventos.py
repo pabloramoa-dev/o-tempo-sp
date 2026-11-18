@@ -65,7 +65,7 @@ def render(now=None):
     events = pauta["eventos"]
     caption = (ROOT / "output/eventos_fim_de_semana/legenda.txt").read_text(encoding="utf-8")
     brief = {
-        "when": "hoje", "date": pauta["edicao"], "is_fixture": False,
+        "when": "hoje", "date": pauta["edicao"], "is_fixture": False, "especial_eventos": True,
         "caption": caption, "wettest": {"rain_pct": max(e["sessoes"][0]["probabilidade_chuva_pct"] for e in events),
                                       "rain_mm": max(e["sessoes"][0]["chuva_mm_na_hora"] or 0 for e in events)}
     }
