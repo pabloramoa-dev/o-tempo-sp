@@ -51,3 +51,18 @@ def test_recursos_gratuitos_versionados():
     assert G.MUSICA.is_file()
     fig = json.loads((G.DUPLA / "figurantes.json").read_text(encoding="utf-8"))
     assert len(fig["peeps"]) >= 5 and fig["geo"].startswith("data:image/svg")
+
+
+def test_qa_aceita_dupla_de_producao():
+    from src.otemposp.characters import quality_direction as QA
+    brief = G.brief_ilustrativo("amanhã", "2026-11-18")
+    bat, falante, cidades, lider, outro = G.roteiro_dupla(brief)
+    batidas = [dict(b, ini=k * 2.3, fim=k * 2.3 + 2.0) for k, b in enumerate(bat)]
+    dur = len(bat) * 2.3
+    pacote = {"demo": False, "personagem": lider, "cidades": cidades, "batidas": batidas,
+              "direcao": [], "dur": dur,
+              "dupla": {"apresenta": lider, "acompanha": outro, "falantes": falante}}
+    probe = {"streams": [{"codec_type": "video", "width": 1080, "height": 1920, "avg_frame_rate": "30/1"},
+                         {"codec_type": "audio"}], "format": {"duration": str(dur)}}
+    erros = QA.verificar(pacote, probe)["erros"]
+    assert not [e for e in erros if "gancho" in e or "CTA" in e or "Dupla" in e], erros

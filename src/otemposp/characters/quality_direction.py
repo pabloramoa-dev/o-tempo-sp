@@ -16,12 +16,24 @@ def verificar(pacote, probe):
     if pacote.get("personagem") not in {"bira", "bia"}:
         erros.append("Personagem fora do elenco diário")
     if not pacote.get("demo"):
-        if batidas and batidas[0].get("tipo") != "gancho":
-            erros.append("Reel sem gancho meteorológico no primeiro quadro")
-        if batidas and batidas[-1].get("tipo") != "cta":
-            erros.append("Convite de compartilhamento não está no encerramento")
-        if sum(b.get("tipo") == "cta" for b in batidas) != 1:
-            erros.append("Reel deve ter um único CTA")
+        dupla = pacote.get("dupla")
+        if dupla:
+            # Formato em dupla: saudação curta, o gancho logo na 2ª fala, o CTA
+            # com quem apresenta e a despedida de quem acompanha no fim.
+            if len(batidas) < 2 or batidas[1].get("tipo") != "gancho":
+                erros.append("Dupla sem gancho meteorológico logo após a saudação")
+            ctas = [i for i, b in enumerate(batidas) if b.get("tipo") == "cta"]
+            if ctas != [len(batidas) - 2, len(batidas) - 1]:
+                erros.append("Dupla deve terminar com o CTA e a despedida")
+            elif dupla.get("falantes", [None])[ctas[0]] != dupla.get("apresenta"):
+                erros.append("CTA da dupla deve ficar com quem apresenta")
+        else:
+            if batidas and batidas[0].get("tipo") != "gancho":
+                erros.append("Reel sem gancho meteorológico no primeiro quadro")
+            if batidas and batidas[-1].get("tipo") != "cta":
+                erros.append("Convite de compartilhamento não está no encerramento")
+            if sum(b.get("tipo") == "cta" for b in batidas) != 1:
+                erros.append("Reel deve ter um único CTA")
         if len(pacote.get("cidades", [])) != 11:
             erros.append("Reel deve apresentar as onze localidades verificadas")
 
