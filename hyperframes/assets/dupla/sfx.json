@@ -1,0 +1,111 @@
+{
+ "origem": "https://github.com/wyzowl/sfx-kit",
+ "licenca": "CC0 1.0",
+ "sons": {
+  "boom-hit-medium": {
+   "arquivo": "sfx/boom-hit-medium.flac",
+   "sync_at": 0.038,
+   "meets": "instant"
+  },
+  "cinematic-drum-big": {
+   "arquivo": "sfx/cinematic-drum-big.flac",
+   "sync_at": 0.011,
+   "meets": "instant"
+  },
+  "data-countup-short": {
+   "arquivo": "sfx/data-countup-short.flac",
+   "sync_at": 0,
+   "meets": "action-start"
+  },
+  "data-number-land": {
+   "arquivo": "sfx/data-number-land.flac",
+   "sync_at": 0.011,
+   "meets": "instant"
+  },
+  "digital-glitch-clear": {
+   "arquivo": "sfx/digital-glitch-clear.flac",
+   "sync_at": 0.018,
+   "meets": "instant"
+  },
+  "impact-light-firm": {
+   "arquivo": "sfx/impact-light-firm.flac",
+   "sync_at": 0.011,
+   "meets": "instant"
+  },
+  "impact-medium-soft": {
+   "arquivo": "sfx/impact-medium-soft.flac",
+   "sync_at": 0.013,
+   "meets": "instant"
+  },
+  "move-bounce": {
+   "arquivo": "sfx/move-bounce.flac",
+   "sync_at": 0.011,
+   "meets": "instant"
+  },
+  "notification-alert-clear": {
+   "arquivo": "sfx/notification-alert-clear.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "notification-message-in-soft": {
+   "arquivo": "sfx/notification-message-in-soft.flac",
+   "sync_at": 0.046,
+   "meets": "instant"
+  },
+  "pop-medium-in": {
+   "arquivo": "sfx/pop-medium-in.flac",
+   "sync_at": 0.011,
+   "meets": "instant"
+  },
+  "pop-small-in": {
+   "arquivo": "sfx/pop-small-in.flac",
+   "sync_at": 0.01,
+   "meets": "instant"
+  },
+  "shimmer-short-soft": {
+   "arquivo": "sfx/shimmer-short-soft.flac",
+   "sync_at": 0.012,
+   "meets": "instant"
+  },
+  "sting-warm-short": {
+   "arquivo": "sfx/sting-warm-short.flac",
+   "sync_at": 0.107,
+   "meets": "instant"
+  },
+  "tone-step-1": {
+   "arquivo": "sfx/tone-step-1.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "tone-step-2": {
+   "arquivo": "sfx/tone-step-2.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "tone-step-3": {
+   "arquivo": "sfx/tone-step-3.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "tone-step-4": {
+   "arquivo": "sfx/tone-step-4.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "tone-step-5": {
+   "arquivo": "sfx/tone-step-5.flac",
+   "sync_at": 0,
+   "meets": "instant"
+  },
+  "whoosh-fast-soft": {
+   "arquivo": "sfx/whoosh-fast-soft.flac",
+   "sync_at": 0.099,
+   "meets": "move-peak"
+  },
+  "whoosh-medium-soft": {
+   "arquivo": "sfx/whoosh-medium-soft.flac",
+   "sync_at": 0.229,
+   "meets": "move-peak"
+  }
+ }
+}

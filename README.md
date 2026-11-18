@@ -4,6 +4,29 @@ Boletins com Bira e Bia cobrindo oito setores e 32 subprefeituras. Os Reels têm
 
 A previsão de produção usa MET Norway Locationforecast, com atribuição na legenda e volume de chuva em milímetros. O vídeo vai diretamente à Meta. O registro separado por edição e formato em data/instagram permite retomar o Story sem reenviar o Reel. A publicação exige as credenciais da conta @otemposp. Execuções manuais iniciam em modo de teste por padrão.
 
+## Boletim em dupla — Bira e Bia (padrão desde 18/11/2026)
+
+Todo Reel (06h e 18h) sai com os **dois personagens conversando**, gerado por
+`hyperframes/gerar_dupla.py` a partir da mesma pauta de produção:
+
+- **06h (hoje):** Bira apresenta e a Bia acompanha. **18h (amanhã):** Bia
+  apresenta e o Bira acompanha.
+- As falas se alternam entre os dois: uma localidade falada por região e
+  todas as 11 escritas no quadro. O CTA fica com quem apresenta e quem
+  acompanha se despede.
+- Quem fala ganha destaque e gesticula; o outro olha para ele. A legenda
+  karaokê usa a cor de cada personagem.
+- **Áudio:** voz + trilha CC0 com ducking (a música abaixa quando alguém
+  fala) + efeitos do SFX Kit, normalizados a -14 LUFS.
+- **Recursos gratuitos** versionados em `hyperframes/assets/dupla/`:
+  SFX Kit (github.com/wyzowl/sfx-kit, CC0), "Sunset on the Beach" de Komiku
+  (CC0, acervo SoundSafari/CC0-1.0-Music), figurantes Open Peeps (Pablo
+  Stanley, CC0, via DiceBear) e fundo geopattern (MIT).
+- **Reversão sem editar código:** variável de Actions `SP_FORMATO=solo`
+  volta ao boletim de um personagem só.
+- Teste visual com dados ilustrativos (nunca publicar):
+  `python hyperframes/gerar_dupla.py --ilustrativo amanhã --out output/teste.mp4`
+
 ## Rodízio editorial de localidades
 
 O boletim diário usa **uma localidade por setor** (oito setores da capital e três do litoral), portanto são 11 pontos por Reel. O catálogo conta com **73 bairros e municípios** em `config/locais_sp.yaml`; ele é uma seleção editorial de pontos, não uma promessa de precisão para todos os bairros da cidade.

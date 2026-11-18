@@ -7,3 +7,6 @@ output/*
 *.mp4
 *.wav
 *.mp3
+
+# Recursos gratuitos do boletim em dupla (CC0), versionados de propósito
+!hyperframes/assets/dupla/**

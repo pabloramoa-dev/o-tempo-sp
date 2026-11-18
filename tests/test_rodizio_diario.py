@@ -157,4 +157,10 @@ def test_nomes_sorteados_aparecem_na_fala_e_no_quadro():
         falas = " ".join(b["fala"] for b in beats if b["tipo"] == "resumo")
         nomes = {p["name"] for p in pontos}
         assert {c["nome"] for c in exibidas} == nomes
-        assert all(nome in falas for nome in nomes)
+        # Todas as 11 aparecem no quadro; a fala cita UMA localidade sorteada
+        # por região (roteiro enxuto), nunca um nome fora do rodízio.
+        grupos = {}
+        for p in pontos:
+            grupos.setdefault(sectors()[p["sector"]]["group"], set()).add(p["name"])
+        for regiao, nomes_regiao in grupos.items():
+            assert any(nome in falas for nome in nomes_regiao), (turno, regiao)

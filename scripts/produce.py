@@ -69,6 +69,12 @@ def pauta(brief):
     return beats,cities
 
 def render_brief(brief,destination):
+    # Formato padrão desde 18/11/2026: Bira e Bia em DUPLA (hyperframes/gerar_dupla.py).
+    # Reversão sem editar código: variável SP_FORMATO=solo.
+    import os
+    if os.environ.get("SP_FORMATO", "dupla").strip().lower() != "solo":
+        from hyperframes.gerar_dupla import render_brief_dupla
+        return render_brief_dupla(brief, destination)
     from hyperframes.gerar_hf import preparar, renderizar
     name="bira" if brief["when"]=="hoje" else "bia"
     out=Path(destination)
