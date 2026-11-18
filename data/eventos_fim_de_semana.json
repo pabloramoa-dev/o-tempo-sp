@@ -10,19 +10,20 @@
       "priority": "ingressos esgotados em 20 e 22/11; publico exato nao divulgado",
       "sessions": [
         {
-          "starts_at": "2026-11-20T15:30:00-03:00",
-          "headline": "Eddie Vedder e outros artistas"
+          "starts_at": "2026-11-20T20:00:00-03:00",
+          "headline": "Eddie Vedder"
         },
         {
-          "starts_at": "2026-11-21T15:30:00-03:00",
-          "headline": "Roger Daltrey e Chris Isaak"
+          "starts_at": "2026-11-21T20:00:00-03:00",
+          "headline": "Roger Daltrey"
         },
         {
-          "starts_at": "2026-11-22T15:30:00-03:00",
-          "headline": "Eddie Vedder e outros artistas"
+          "starts_at": "2026-11-22T20:00:00-03:00",
+          "headline": "Eddie Vedder"
         }
       ],
-      "source": "https://www.ticketmaster.com.br/event/best-of-blues-and-rock"
+      "source": "https://billboard.com.br/best-of-blues-and-rock-2026-horarios-shows/",
+      "restrictions": "Guarda-chuvas proibidos; capas de chuva permitidas"
     },
     {
       "name": "Festival da Consciencia Negra",
