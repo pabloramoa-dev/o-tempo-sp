@@ -1,0 +1,46 @@
+{
+  "edition": "2026-11-20",
+  "verified_at": "2026-11-18",
+  "events": [
+    {
+      "name": "Best of Blues and Rock",
+      "venue": "Plateia externa do Auditorio Ibirapuera",
+      "latitude": -23.5881,
+      "longitude": -46.6576,
+      "priority": "ingressos esgotados em 20 e 22/11; publico exato nao divulgado",
+      "sessions": [
+        {
+          "starts_at": "2026-11-20T15:30:00-03:00",
+          "headline": "Eddie Vedder e outros artistas"
+        },
+        {
+          "starts_at": "2026-11-21T15:30:00-03:00",
+          "headline": "Roger Daltrey e Chris Isaak"
+        },
+        {
+          "starts_at": "2026-11-22T15:30:00-03:00",
+          "headline": "Eddie Vedder e outros artistas"
+        }
+      ],
+      "source": "https://www.ticketmaster.com.br/event/best-of-blues-and-rock"
+    },
+    {
+      "name": "Festival da Consciencia Negra",
+      "venue": "Palco Sao Joao, Av. Sao Joao, 747, Centro",
+      "latitude": -23.5408,
+      "longitude": -46.6412,
+      "priority": "mais de 300 atividades gratuitas em toda a cidade; publico exato nao divulgado",
+      "sessions": [
+        {
+          "starts_at": "2026-11-20T13:00:00-03:00",
+          "headline": "Seu Jorge"
+        },
+        {
+          "starts_at": "2026-11-21T19:00:00-03:00",
+          "headline": "Os Garotin"
+        }
+      ],
+      "source": "https://prefeitura.sp.gov.br/web/cultura/w/seu-jorge-jota.p%C3%AA-os-garotin-rachel-reis-tasha-e-tracie-e-samba-de-dandara-s%C3%A3o-destaques-do-festival-consci%C3%AAncia-negra-no-centro-de-s%C3%A3o-paulo"
+    }
+  ]
+}
