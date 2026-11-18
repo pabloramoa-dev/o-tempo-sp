@@ -15,7 +15,18 @@ def verificar(pacote, probe):
         erros.append("Direção diferente do total de falas")
     if pacote.get("personagem") not in {"bira", "bia"}:
         erros.append("Personagem fora do elenco diário")
-    if not pacote.get("demo"):
+    if pacote.get("especial_eventos") and not pacote.get("demo"):
+        if not pacote.get("dupla"):
+            erros.append("O especial exige Bira e Bia")
+        if len(pacote.get("cidades", [])) != 2:
+            erros.append("O especial exige duas localidades dos eventos")
+        if sum(b.get("tipo") == "gancho" for b in batidas) != 2:
+            erros.append("O especial exige dois eventos meteorologicos")
+        if not batidas or batidas[-1].get("tipo") != "cta":
+            erros.append("O especial exige CTA no encerramento")
+        if sum(b.get("tipo") == "cta" for b in batidas) != 1:
+            erros.append("O especial deve ter somente um CTA")
+    if not pacote.get("demo") and not pacote.get("especial_eventos"):
         dupla = pacote.get("dupla")
         if dupla:
             # Formato em dupla: saudação curta, o gancho logo na 2ª fala, o CTA
