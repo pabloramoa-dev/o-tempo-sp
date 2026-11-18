@@ -33,7 +33,7 @@ def condition(p):
         raise ValueError("Modelo nao retornou campos suficientes")
     tips = []
     if prob >= 50:
-        tips.append("Leve capa de chuva ou guarda-chuva e confira os avisos oficiais.")
+        tips.append("Leve capa de chuva e confira os avisos oficiais e as regras do evento.")
     if temp <= 18:
         tips.append("Leve agasalho.")
     elif temp >= 30:
