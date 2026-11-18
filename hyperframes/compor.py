@@ -31,7 +31,8 @@ PT = "#10202e"
 
 TITULOS = {'rio_antes_de_sair': 'SÃO PAULO ANTES DE SAIR', 'chove_onde': 'O TEMPO MUDA ONDE?',
            'vai_dar_praia': 'VAI DAR PRAIA?', 'fim_de_semana': 'SEU FIM DE SEMANA',
-           'vai_ao_jogo': 'VAI AO JOGO?', 'amanha_no_rio': 'AMANHÃ EM SÃO PAULO'}
+           'vai_ao_jogo': 'VAI AO JOGO?', 'amanha_no_rio': 'AMANHÃ EM SÃO PAULO',
+           'eventos_fim_de_semana': 'VAI SAIR? CONFIRA O TEMPO!'}
 
 CEUS = {  # topo, meio, morros, mar
     "sol": ("#2f8fd8", "#bfe6f7", "#3f7a5c", "#2f9bc0"),
