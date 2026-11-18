@@ -88,3 +88,5 @@ def render(now=None):
 
 if __name__ == "__main__":
     render()
+
+# QA especial: validacao independente dos boletins diarios.
