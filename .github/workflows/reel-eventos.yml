@@ -1,0 +1,73 @@
+name: Reel especial - eventos SP sexta 14h
+on:
+  schedule:
+    - cron: '0 17 * * 5' # sexta, 14h America/Sao_Paulo (BRT)
+  push:
+    paths:
+      - '.github/workflows/reel-eventos.yml'
+      - 'scripts/render_eventos.py'
+  workflow_dispatch:
+    inputs:
+      publicar:
+        type: boolean
+        default: false
+        description: Publicar somente se sexta a partir das 14h
+permissions:
+  contents: write
+concurrency:
+  group: instagram-otemposp
+  cancel-in-progress: false
+jobs:
+  eventos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 105
+    env:
+      LIVE: ${{ (github.event_name == 'schedule' && vars.SP_AUTOMATION_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.publicar) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-hyperframes
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dependencias de audio e teste
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng
+          pip install -r requirements-voice.txt pytest
+          python -m compileall -q scripts src hyperframes
+          python -m pytest -q
+      - name: Verificar evento real, consultar previsao e renderizar Bira e Bia
+        run: python -m scripts.render_eventos
+      - name: Conferir MP4
+        run: |
+          test -s output/eventos_fim_de_semana/especial-eventos-sp.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 output/eventos_fim_de_semana/especial-eventos-sp.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: especial-eventos-sp-${{ github.run_id }}
+          path: |
+            output/eventos_fim_de_semana/*.mp4
+            output/eventos_fim_de_semana/*.json
+            output/eventos_fim_de_semana/*.txt
+          retention-days: 7
+      - name: Publicar em sexta-feira às 14h, sem duplicar
+        if: env.LIVE == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          dt=datetime.now(ZoneInfo("America/Sao_Paulo"))
+          assert dt.weekday()==4 and dt.hour in (14,15), "Fora da janela de sexta 14h-16h"
+          PY
+          test "$(gh api repos/$GITHUB_REPOSITORY --jq .visibility)" = "public"
+          tag="eventos-sp-$(date -u +%Y%m%d)-${GITHUB_RUN_ID}"
+          video="output/eventos_fim_de_semana/especial-eventos-sp.mp4"
+          gh release create "$tag" "$video" --title "Especial de eventos SP" --notes "Previsao por horario e local para dois eventos de Sao Paulo"
+          REEL_PUBLIC_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$(basename "$video")" python -m scripts.publicar_eventos
+          gh release delete "$tag" --cleanup-tag --yes
