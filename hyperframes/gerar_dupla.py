@@ -372,7 +372,8 @@ def preparar_dupla(brief, out):
     shutil.copy(RAIZ / 'video/node_modules/gsap/dist/gsap.min.js', vendor)
 
     bat, falante, cidades, lider, outro = roteiro_dupla(brief)
-    formato = 'amanha_no_rio' if lider == 'bia' else 'rio_antes_de_sair'
+    formato = ('eventos_fim_de_semana' if brief.get('especial_eventos') else
+               'amanha_no_rio' if lider == 'bia' else 'rio_antes_de_sair')
     segs, pistas, raw = narrar_dupla(bat, falante, work)
     tempos = [(s['ini'], max(s['ini'] + 0.2, s['fim_fala'])) for s in segs]
     dur = round(segs[-1]['fim'] + HF.CAUDA, 2)
@@ -404,9 +405,10 @@ def preparar_dupla(brief, out):
     plano = DIRECAO.planejar(bat, [dict(ini=s, fim=e) for s, e in tempos], lider)
     pacote = {
         'dicas_praticas': [], 'direcao': plano if DIRECAO.ativo() else [],
+        'especial_eventos': bool(brief.get('especial_eventos')),
         'dur': dur, 'personagem': lider, 'formato': formato, 'demo': bool(brief.get('is_fixture')),
         'data': data_iso, 'data_ext': HF.data_extenso(data_iso), 'data_previsao': data_iso,
-        'hora': '06:00' if lider == 'bira' else '18:00',
+        'hora': '14:00' if brief.get('especial_eventos') else ('06:00' if lider == 'bira' else '18:00'),
         'ceu': 'chuva' if ((brief['wettest'].get('rain_pct') or 0) >= 70
                          or (brief['wettest'].get('rain_mm') or 0) >= 10) else 'sol',
         'cidades': cidades,
