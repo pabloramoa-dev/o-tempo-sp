@@ -47,6 +47,7 @@ def condition(p):
 def run(now=None):
     now = now or datetime.now(TZ)
     edition = now.date() if now.weekday() == 4 else now.date() + timedelta(days=(4-now.weekday())%7)
+    publicacao = datetime.combine(edition, datetime.min.time(), TZ).replace(hour=14)
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     if catalog["edition"] != edition.isoformat():
         raise RuntimeError("Catalogo de eventos desatualizado. Nao criar pauta com eventos antigos.")
@@ -60,7 +61,7 @@ def run(now=None):
         sessions = []
         for s in e["sessions"]:
             dt = datetime.fromisoformat(s["starts_at"]).astimezone(TZ)
-            if dt < now or dt.date() > edition + timedelta(days=2):
+            if dt <= publicacao or dt < now or dt.date() > edition + timedelta(days=2):
                 continue
             key = dt.strftime("%Y-%m-%dT%H:00")
             if key not in values:
@@ -74,6 +75,7 @@ def run(now=None):
                              "orientacoes": condition(p)})
         if not sessions:
             raise RuntimeError("Evento sem sessao futura confirmada")
+        sessions.sort(key=lambda sessao: sessao["data_hora"])
         output.append({"evento": e["name"], "local": e["venue"], "fonte_evento": e["source"],
                        "criterio_selecao": e["priority"], "sessoes": sessions})
     lines = ["VAI SAIR? CONFIRA O TEMPO! | @otemposp", "Previsao para os eventos do feriado/fim de semana"]
