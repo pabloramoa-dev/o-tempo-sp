@@ -1,0 +1,23 @@
+name: Pauta semanal - tempo nos 2 maiores eventos SP
+on:
+  schedule:
+    - cron: '0 13 * * 5' # sexta 10h no horario de Brasilia (UTC-3)
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pauta_eventos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Checar agenda e consultar previsao horaria
+        run: python -m scripts.eventos_fim_de_semana
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eventos-sp-${{ github.run_id }}
+          path: output/eventos_fim_de_semana/
+          retention-days: 7
