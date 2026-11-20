@@ -16,7 +16,7 @@ def main():
     nome=rel["eventos"][0]["local"]
     temps=rel["temperaturas_reais"].get(nome)
     cidades=[{"nome":nome,"min":temps["min"],"max":temps["max"],
-              "chuva_mm":None}] if temps else []
+              "chuva_mm":temps["chuva_mm"]}] if temps else []
     dupla.roteiro_dupla=lambda _: (beats,falantes,cidades,"bira","bia")
     dupla.C.TITULOS["eventos_fim_de_semana"]="PLANTÃO TEMPO SEVERO"
     brief={"when":"hoje","date":rel["data"],"is_fixture":False,
