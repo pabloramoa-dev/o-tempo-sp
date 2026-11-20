@@ -20,7 +20,7 @@ def main():
     dupla.roteiro_dupla=lambda _: (beats,falantes,cidades,"bira","bia")
     dupla.C.TITULOS["eventos_fim_de_semana"]="PLANTÃO TEMPO SEVERO"
     brief={"when":"hoje","date":rel["data"],"is_fixture":False,
-           "especial_eventos":True,"caption":legenda,
+           "especial_eventos":True,"especial_alerta":True,"caption":legenda,
            "wettest":{"rain_pct":None,"rain_mm":None}}
     dupla.render_brief_dupla(brief,out)
     if out.stat().st_size<100000:
