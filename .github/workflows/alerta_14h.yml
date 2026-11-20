@@ -62,7 +62,8 @@ jobs:
           PY
       - name: Sem risco validado
         if: steps.consulta.outputs.publicar != 'true'
-        run: echo 'Nenhuma publicação: sem alerta validado, ou fonte INMET indisponível.' >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo 'Nenhuma publicação: sem alerta validado, ou fonte INMET indisponível.' >> "$GITHUB_STEP_SUMMARY"
       - uses: ./.github/actions/setup-hyperframes
         if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
       - name: Dependências do estúdio SP
