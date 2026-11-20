@@ -28,12 +28,36 @@ Modelo (cacheado em $OTEMPOSP_KOKORO_DIR ou ~/.cache/otemposp_kokoro):
 """
 import argparse, json, os, subprocess, sys, wave
 import time
+import re
 import numpy as np
 
 SR = 44100
 BASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
 ARQS = {"kokoro-v1.0.onnx": f"{BASE}/kokoro-v1.0.onnx",
         "voices-v1.0.bin":  f"{BASE}/voices-v1.0.bin"}
+
+
+
+# Normalização apenas para o sintetizador: telas, legendas e roteiro original
+# continuam exibindo "17h". Não confundir hora do dia com quilômetro/hora.
+_HORA_TTS_RE = re.compile(
+    r"(?<![\w/])(?P<hora>(?:[01]?\d|2[0-3]))\s*"
+    r"(?:[hH](?P<min_h>[0-5]\d)?|:(?P<min_d>[0-5]\d))(?!\w)"
+)
+
+
+def normalizar_horario_para_voz(texto: str) -> str:
+    """'17H'/'17h'/'17:00' -> '17 horas'; '17h30' -> '17 horas e 30 minutos'."""
+    def trocar(match):
+        hora = int(match.group("hora"))
+        minuto = match.group("min_h") or match.group("min_d")
+        unidade = "hora" if hora == 1 else "horas"
+        if minuto is None or int(minuto) == 0:
+            return f"{hora} {unidade}"
+        minuto = int(minuto)
+        return f"{hora} {unidade} e {minuto} {'minuto' if minuto == 1 else 'minutos'}"
+
+    return _HORA_TTS_RE.sub(trocar, texto)
 
 
 def cache_dir():
@@ -112,7 +136,7 @@ def main():
     segs = []
     t = 0.0
     for i, txt in enumerate(linhas):
-        s, sr = k.create(txt, voice=estilo(k, a.voz), speed=a.speed, lang="pt-br")
+        s, sr = k.create(normalizar_horario_para_voz(txt), voice=estilo(k, a.voz), speed=a.speed, lang="pt-br")
         s = resample_44100(np.asarray(s, dtype=np.float32), sr)
         ini = t
         buf.append(s); buf.append(gap)
