@@ -15,7 +15,12 @@ def verificar(pacote, probe):
         erros.append("Direção diferente do total de falas")
     if pacote.get("personagem") not in {"bira", "bia"}:
         erros.append("Personagem fora do elenco diário")
-    if pacote.get("especial_eventos") and not pacote.get("demo"):
+    if pacote.get("especial_alerta") and not pacote.get("demo"):
+        if not pacote.get("dupla") or not pacote.get("cidades"):
+            erros.append("O alerta exige dupla Bira/Bia e localidade real")
+        if not pacote.get("batidas") or pacote["batidas"][-1].get("tipo") != "cta":
+            erros.append("Alerta sem CTA final")
+    if pacote.get("especial_eventos") and not pacote.get("especial_alerta") and not pacote.get("demo"):
         if not pacote.get("dupla"):
             erros.append("O especial exige Bira e Bia")
         if len(pacote.get("cidades", [])) != 2:
