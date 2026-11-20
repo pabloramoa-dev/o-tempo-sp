@@ -157,7 +157,10 @@ def verificar(agora=None):
     base_temperaturas={}
     for i,(nome,lat,lon) in enumerate(CONFIG["cidades"]):
         a,b=[por_hora(respostas[k][i],agora) for k in (0,1)]
-        base_temperaturas[nome]=round(float(next(iter(a.values()))["temperature_2m"]),1)
+        hoje=[float(v["temperature_2m"]) for t,v in a.items() if t.date()==agora.date()]
+        if not hoje: hoje=[float(v["temperature_2m"]) for v in a.values()]
+        base_temperaturas[nome]={"min":round(min(hoje)),"max":round(max(hoje)),
+                               "amostra_horaria_c":round(hoje[0],1)}
         aa,bb=sinais(a),sinais(b)
         for e in aa:
             pares=[f for f in bb if f["tipo"]==e["tipo"] and f["unidade"]==e["unidade"]
