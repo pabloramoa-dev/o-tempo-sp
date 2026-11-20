@@ -1,0 +1,133 @@
+name: Alerta regional de tempo severo — 14h BRT
+on:
+  schedule:
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Somente verificar; não publicar"
+        type: boolean
+        default: true
+  push:
+    paths:
+      - 'tools/alerta_14h.py'
+      - 'tools/alerta_14h_roteiro.py'
+      - 'tools/render_alerta_14h.py'
+      - 'tools/publicar_alerta_14h.py'
+      - 'tests/test_alerta_14h.py'
+      - '.github/workflows/alerta_14h.yml'
+permissions:
+  contents: write
+concurrency:
+  group: instagram-otemposp
+  cancel-in-progress: false
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 105
+    env:
+      TZ: America/Sao_Paulo
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Instalar requests
+        run: pip install requests
+      - name: Testar limiares e sintaxe
+        run: |
+          python -m compileall -q tools
+          python -m unittest discover -s tests -p test_alerta_14h.py -v
+      - name: Consulta oficial INMET, Defesa Civil e ICON/GFS
+        id: consulta
+        run: python -m tools.alerta_14h
+      - name: Resumo com fonte e risco
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path('output/alertas/consulta.json')
+          if p.exists():
+              r=json.loads(p.read_text())
+              with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+                  print('## Alerta 14h —',r['local'],file=f)
+                  print('Publicar:',r['publicar'],file=f)
+                  print('Origem:',r['modo'],file=f)
+                  print('Evento:',r['eventos'][:1],file=f)
+                  print('Fontes:',{k:v['status'] for k,v in r['oficiais']['fontes'].items()},file=f)
+          PY
+      - name: Sem risco validado
+        if: steps.consulta.outputs.publicar != 'true'
+        run: echo 'Nenhuma publicação: sem alerta validado, ou fonte INMET indisponível.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: ./.github/actions/setup-hyperframes
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
+      - name: Dependências do estúdio SP
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng
+          pip install -r requirements-voice.txt
+
+      - name: Renderizar plantão do canal
+        id: render
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
+        run: python -m tools.render_alerta_14h
+      - name: QA do vídeo
+        if: steps.render.outcome == 'success'
+        run: |
+          python - <<'PY'
+          import json,subprocess
+          j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json','output/alertas/ALERTA.mp4']))
+          v=[s for s in j['streams'] if s['codec_type']=='video']
+          a=[s for s in j['streams'] if s['codec_type']=='audio']
+          assert len(v)==1 and a and (v[0]['width'],v[0]['height'])==(1080,1920),'MP4 sem vídeo/áudio vertical'
+          assert 8<=float(j['format']['duration'])<=180,'Duração incorreta'
+          PY
+      - name: Criar Release temporário para Meta
+        id: release
+        if: steps.render.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="alerta-14h-$GITHUB_RUN_ID"
+          gh release create "$tag" output/alertas/ALERTA.mp4 --target "$GITHUB_SHA" --title "$tag" --notes "Plantão meteorológico"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "url=https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/ALERTA.mp4" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar Reels e Stories
+        id: publicar
+        if: steps.render.outcome == 'success'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+        run: python -m tools.publicar_alerta_14h --video-url "${{ steps.release.outputs.url }}"
+      - name: Persistir recibos de cada mídia
+        if: always() && steps.render.outcome == 'success'
+        run: |
+          if [[ ! -f data/alertas_14h_publicados.json ]]; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/alertas_14h_publicados.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Recibos do plantão 14h [skip ci]'
+          git pull --rebase && git push
+      - name: Apagar Release somente após Meta confirmar ambas as publicações
+        if: steps.publicar.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete "${{ steps.release.outputs.tag }}" --cleanup-tag --yes
+
+      - name: Evidências de consulta e render
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alerta-14h-${{ github.run_id }}
+          path: |
+            output/alertas/
+            data/alertas_14h_publicados.json
+          retention-days: 3
+          if-no-files-found: warn
