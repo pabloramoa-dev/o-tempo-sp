@@ -159,7 +159,9 @@ def verificar(agora=None):
         a,b=[por_hora(respostas[k][i],agora) for k in (0,1)]
         hoje=[float(v["temperature_2m"]) for t,v in a.items() if t.date()==agora.date()]
         if not hoje: hoje=[float(v["temperature_2m"]) for v in a.values()]
+        chuva_hoje=sum(float(v["precipitation"]) for t,v in a.items() if t.date()==agora.date())
         base_temperaturas[nome]={"min":round(min(hoje)),"max":round(max(hoje)),
+                               "chuva_mm":round(chuva_hoje,1),
                                "amostra_horaria_c":round(hoje[0],1)}
         aa,bb=sinais(a),sinais(b)
         for e in aa:
