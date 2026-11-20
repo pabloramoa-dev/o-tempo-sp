@@ -35,6 +35,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verificar data do disparo extraordinario
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]')
+        run: |
+          test "$(TZ=America/Sao_Paulo date +%F)" = "2026-11-20" || {
+            echo "::error::Disparo excepcional autorizado somente em 20/11/2026"
+            exit 1
+          }
       - name: Instalar requests
         run: pip install requests
       - name: Testar limiares e sintaxe
@@ -65,16 +72,16 @@ jobs:
         run: |
           echo 'Nenhuma publicação: sem alerta validado, ou fonte INMET indisponível.' >> "$GITHUB_STEP_SUMMARY"
       - uses: ./.github/actions/setup-hyperframes
-        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')))
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]')))
       - name: Dependências do estúdio SP
-        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')))
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]')))
         run: |
           sudo apt-get update -qq && sudo apt-get install -y ffmpeg espeak-ng
           pip install -r requirements-voice.txt
 
       - name: Renderizar plantão do canal
         id: render
-        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')))
+        if: steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[teste-render-alerta]')) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]')))
         run: python -m tools.render_alerta_14h
       - name: QA do vídeo
         if: steps.render.outcome == 'success'
@@ -89,7 +96,7 @@ jobs:
           PY
       - name: Criar Release temporário para Meta
         id: release
-        if: steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)))
+        if: steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]'))))
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -100,14 +107,18 @@ jobs:
 
       - name: Publicar Reels e Stories
         id: publicar
-        if: steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)))
+        if: steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]'))))
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
-        run: python -m tools.publicar_alerta_14h --video-url "${{ steps.release.outputs.url }}"
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            test "$(TZ=America/Sao_Paulo date +%F)" = "2026-11-20" || exit 1
+          fi
+          python -m tools.publicar_alerta_14h --video-url "${{ steps.release.outputs.url }}"
       - name: Persistir recibos de cada mídia
-        if: always() && steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)))
+        if: always() && steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]'))))
         run: |
           if [[ ! -f data/alertas_14h_publicados.json ]]; then exit 0; fi
           git config user.name 'github-actions[bot]'
