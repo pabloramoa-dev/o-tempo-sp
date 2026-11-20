@@ -172,7 +172,8 @@ def verificar(agora=None):
     eventos.sort(key=lambda x:(-PRIORIDADE[x["tipo"]],-x["valor"],x["inicio"]))
     modo="dois_modelos"
     avisos=oficial["fontes"]["inmet"]["dados"]
-    if not eventos:
+    tem_risco_para_hoje=any(datetime.fromisoformat(e["inicio"]).date()==agora.date() for e in eventos)
+    if not tem_risco_para_hoje:
         candidatos=[a for a in avisos if a["tipo"] in ("temporal","chuva","granizo","vento")
                     and datetime.fromisoformat(a["inicio"])<=agora<datetime.fromisoformat(a["fim"])]
         candidatos.sort(key=lambda a:((a["severidade"] or "")=="Severe",len(a["cidades"])),reverse=True)
