@@ -406,6 +406,7 @@ def preparar_dupla(brief, out):
     pacote = {
         'dicas_praticas': [], 'direcao': plano if DIRECAO.ativo() else [],
         'especial_eventos': bool(brief.get('especial_eventos')),
+        'especial_alerta': bool(brief.get('especial_alerta')),
         'dur': dur, 'personagem': lider, 'formato': formato, 'demo': bool(brief.get('is_fixture')),
         'data': data_iso, 'data_ext': HF.data_extenso(data_iso), 'data_previsao': data_iso,
         'hora': '14:00' if brief.get('especial_eventos') else ('06:00' if lider == 'bira' else '18:00'),
