@@ -27,6 +27,12 @@ class Alertas14h(unittest.TestCase):
         self.assertFalse(any(e["tipo"]=="granizo" for e in sinais({t:base})))
         self.assertTrue(any(e["tipo"]=="granizo" for e in sinais({t:dict(base,weather_code=96)})))
 
+    def test_acumulado_24h_somente_com_janela_completa(self):
+        t=datetime(2026,11,20,15,tzinfo=TZ)
+        linhas={t+timedelta(hours=i):{"precipitation":3,"wind_gusts_10m":8,
+            "weather_code":3,"temperature_2m":24} for i in range(24)}
+        self.assertTrue(any(e["unidade"]=="mm em 24h" for e in sinais(linhas)))
+
     def test_previsao_incompleta_bloqueia(self):
         agora=datetime(2026,11,20,14,tzinfo=TZ)
         p={"hourly":{"time":[],"precipitation":[],"wind_gusts_10m":[],
