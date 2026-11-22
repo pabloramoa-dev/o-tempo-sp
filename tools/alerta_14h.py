@@ -1,4 +1,4 @@
-"""Alerta regional diário, 14h BRT. ICON+GFS, INMET CAP, Defesa Civil; falha fechada.
+"""Alerta regional diário, 11h BRT. ICON+GFS, INMET CAP, Defesa Civil; falha fechada.
 Não confundir previsão de tempo severo com ocorrência confirmada.
 """
 import json, math, os, re, unicodedata, xml.etree.ElementTree as ET
@@ -98,7 +98,7 @@ def fontes(agora):
     except Exception as exc:
         out["defesa_civil"]={"status":"indisponivel","url":CONFIG["defesa_civil"],
                             "erro":str(exc)[:200]}
-    return {"fontes":out,"completa":out["inmet"]["status"]=="ok",
+    return {"fontes":out,"completa":all(f["status"]=="ok" for f in out.values()),
             "observacao":"Falha de consulta nao significa ausencia de alerta. Defesa Civil e complementar."}
 
 def por_hora(payload,agora):
@@ -174,20 +174,8 @@ def verificar(agora=None):
     eventos.sort(key=lambda x:(-PRIORIDADE[x["tipo"]],-x["valor"],x["inicio"]))
     modo="dois_modelos"
     avisos=oficial["fontes"]["inmet"]["dados"]
-    tem_risco_para_hoje=any(datetime.fromisoformat(e["inicio"]).date()==agora.date() for e in eventos)
-    if not tem_risco_para_hoje:
-        candidatos=[a for a in avisos if a["tipo"] in ("temporal","chuva","granizo","vento")
-                    and datetime.fromisoformat(a["inicio"])<=agora<datetime.fromisoformat(a["fim"])]
-        candidatos.sort(key=lambda a:((a["severidade"] or "")=="Severe",len(a["cidades"])),reverse=True)
-        if candidatos:
-            a=candidatos[0]
-            tipo=a["tipo"]
-            eventos=[{"tipo":tipo,"local":a["cidades"][0],
-                      "inicio":a["inicio"],"fim":a["fim"],
-                      "fonte":"INMET","aviso_id":a["id"],
-                      "observacao":"Aviso oficial; nao e concordancia de dois modelos"}]
-            modo="aviso_oficial_inmet"
     correspondentes=[a for a in avisos if any(e["local"] in a["cidades"] and e["tipo"]==a["tipo"]
+                  and max(e["inicio"],a["inicio"]) < min(e["fim"],a["fim"])
                   for e in eventos)]
     return {"data":agora.date().isoformat(),"emitido_em":agora.isoformat(),
             "local":CONFIG["label"],"canal":CONFIG["handle"],"uf":CONFIG["uf"],
