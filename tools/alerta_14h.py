@@ -98,8 +98,8 @@ def fontes(agora):
     except Exception as exc:
         out["defesa_civil"]={"status":"indisponivel","url":CONFIG["defesa_civil"],
                             "erro":str(exc)[:200]}
-    return {"fontes":out,"completa":all(f["status"]=="ok" for f in out.values()),
-            "observacao":"Falha de consulta nao significa ausencia de alerta. Defesa Civil e complementar."}
+    return {"fontes":out,"completa":out["inmet"]["status"]=="ok",
+            "observacao":"CAP do INMET obrigatorio; portal da Defesa Civil contextual e nao bloqueante."}
 
 def por_hora(payload,agora):
     h=payload["hourly"]
@@ -139,6 +139,22 @@ def sinais(linhas):
                 add("chuva",sum(float(x["precipitation"]) for x in win),f"mm em {n}h",n)
     return ev
 
+def aviso_oficial_prioritario(avisos, agora):
+    """Escolhe somente CAP vigente do INMET para cidades atendidas pelo canal."""
+    candidatos = [
+        a for a in avisos
+        if a.get("tipo") in PRIORIDADE and a.get("cidades")
+        and a.get("id") and a.get("inicio") and a.get("fim")
+        and datetime.fromisoformat(a["fim"]) > agora
+        and datetime.fromisoformat(a["inicio"]) <= agora + timedelta(hours=24)
+    ]
+    niveis = {"Extreme": 3, "Severe": 2, "Moderate": 1}
+    candidatos.sort(key=lambda a: (
+        -niveis.get(a.get("severidade"), 0),
+        -PRIORIDADE[a["tipo"]], a["inicio"]))
+    return candidatos[0] if candidatos else None
+
+
 def verificar(agora=None):
     agora=agora or datetime.now(TZ)
     oficial=fontes(agora)
@@ -177,6 +193,16 @@ def verificar(agora=None):
     correspondentes=[a for a in avisos if any(e["local"] in a["cidades"] and e["tipo"]==a["tipo"]
                   and max(e["inicio"],a["inicio"]) < min(e["fim"],a["fim"])
                   for e in eventos)]
+    aviso = aviso_oficial_prioritario(avisos, agora)
+    if aviso:
+        # CAP oficial valida o risco por si: ICON/GFS nao precisam concordar.
+        # Nao inventar milimetros nem rajadas do boletim meteorologico.
+        eventos.insert(0, {
+            "tipo": aviso["tipo"], "local": aviso["cidades"][0],
+            "inicio": aviso["inicio"], "fim": aviso["fim"],
+            "aviso_id": aviso["id"]})
+        correspondentes = [aviso] + [a for a in correspondentes if a["id"] != aviso["id"]]
+        modo = "aviso_oficial_inmet"
     return {"data":agora.date().isoformat(),"emitido_em":agora.isoformat(),
             "local":CONFIG["label"],"canal":CONFIG["handle"],"uf":CONFIG["uf"],
             "modelos":list(MODELOS),"url_modelos":FORECAST,"eventos":eventos,
