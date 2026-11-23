@@ -53,4 +53,40 @@ class Alertas14h(unittest.TestCase):
            "oficiais":{"completa":True},"eventos":[]}
         with self.assertRaises(ValueError):validar(r,agora)
 
+
+    def test_aviso_inmet_valido_publica_mesmo_sem_sinal_dos_modelos(self):
+        from unittest.mock import patch
+        from tools.alerta_14h import verificar
+        agora = datetime(2026, 11, 23, 11, tzinfo=TZ)
+        cidade = CONFIG["cidades"][0][0]
+        aviso = {"id": "123456", "tipo": "temporal", "evento": "Tempestade",
+                 "severidade": "Severe", "cidades": [cidade],
+                 "inicio": (agora-timedelta(hours=1)).isoformat(),
+                 "fim": (agora+timedelta(hours=8)).isoformat()}
+        fonte = {"fontes": {"inmet": {"status": "ok", "dados": [aviso]},
+                            "defesa_civil": {"status": "indisponivel"}},
+                 "completa": True}
+        horas = {agora+timedelta(hours=i): {
+            "temperature_2m": 24, "precipitation": 0,
+            "wind_gusts_10m": 10, "weather_code": 3}
+            for i in range(1, 25)}
+        with patch("tools.alerta_14h.fontes", return_value=fonte), \
+             patch("tools.alerta_14h.fetch") as buscar, \
+             patch("tools.alerta_14h.por_hora", return_value=horas):
+            buscar.return_value.json.return_value = [{} for _ in CONFIG["cidades"]]
+            relatorio = verificar(agora)
+        self.assertTrue(relatorio["publicar"])
+        self.assertEqual(relatorio["modo"], "aviso_oficial_inmet")
+        self.assertEqual(relatorio["eventos"][0]["aviso_id"], "123456")
+        validar(relatorio, agora)
+
+    def test_aviso_inmet_vencido_nunca_autoriza_publicacao(self):
+        from tools.alerta_14h import aviso_oficial_prioritario
+        agora = datetime(2026, 11, 23, 11, tzinfo=TZ)
+        aviso = {"id": "antigo", "tipo": "temporal",
+                 "cidades": [CONFIG["cidades"][0][0]], "severidade": "Severe",
+                 "inicio": (agora-timedelta(hours=8)).isoformat(),
+                 "fim": (agora-timedelta(minutes=1)).isoformat()}
+        self.assertIsNone(aviso_oficial_prioritario([aviso], agora))
+
 if __name__=="__main__": unittest.main()
