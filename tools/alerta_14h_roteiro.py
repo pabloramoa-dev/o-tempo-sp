@@ -4,7 +4,7 @@ from pathlib import Path
 from tools.alerta_14h import validar, TZ
 
 ROTULOS = {"granizo":"possibilidade de granizo", "temporal":"risco de temporal",
-           "chuva":"chuva intensa", "vento":"ventos fortes"}
+           "chuva":"chuva intensa", "vento":"ventos fortes", "ciclone":"risco associado a ciclone"}
 
 def montar(rel):
     validar(rel)
@@ -23,9 +23,11 @@ def montar(rel):
             aviso.get("severidade"),"meteorológico")
         abertura=(f"Atenção, {rel['local']}! O INMET mantém alerta {nivel} de "
                   f"{aviso['evento'].lower()} válido até {fim:%Hh%M} de {fim:%d/%m}.")
-        detalhe=("O aviso indica risco potencial de chuva forte, rajadas de vento e, "
-                 "dependendo da área, possibilidade de granizo. "
-                 "Isso não significa que a tempestade ocorrerá em todas as cidades.")
+        detalhe=(("O aviso oficial menciona um ciclone. Consulte a trajetória e as orientações do órgão emissor. "
+                  "A intensidade dos efeitos varia conforme a região.") if e["tipo"]=="ciclone" else
+                 ("O aviso indica risco potencial de chuva forte, rajadas de vento e, "
+                  "dependendo da área, possibilidade de granizo. "
+                  "Isso não significa que a tempestade ocorrerá em todas as cidades."))
         atrib="Fonte: aviso oficial do INMET."
     else:
         abertura=(f"Atenção, {rel['local']}! Dois modelos indicam {tipo} "
