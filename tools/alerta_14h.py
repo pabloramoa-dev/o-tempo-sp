@@ -14,9 +14,9 @@ FORECAST = "https://api.open-meteo.com/v1/forecast"
 MODELOS = ("icon_seamless", "gfs_seamless")
 HOURLY = ("precipitation", "wind_gusts_10m", "weather_code", "temperature_2m")
 NS = {"c":"urn:oasis:names:tc:emergency:cap:1.2"}
-PRIORIDADE = {"granizo":4, "temporal":3, "chuva":2, "vento":1}
+PRIORIDADE = {"ciclone":5, "granizo":4, "temporal":3, "chuva":2, "vento":1}
 TIPOS = {"TEMPESTADE":"temporal", "CHUVAS INTENSAS":"chuva",
-         "ACUMULADO DE CHUVA":"chuva", "VENDAVAL":"vento", "GRANIZO":"granizo"}
+         "ACUMULADO DE CHUVA":"chuva", "VENDAVAL":"vento", "GRANIZO":"granizo", "CICLONE":"ciclone", "CICLONE EXTRATROPICAL":"ciclone", "CICLONE SUBTROPICAL":"ciclone", "CICLONE TROPICAL":"ciclone"}
 
 def normal(s):
     return "".join(c for c in unicodedata.normalize("NFD", s)
