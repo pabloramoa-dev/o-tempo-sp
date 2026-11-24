@@ -99,6 +99,8 @@ ILUSTRATIVO = {
     'oeste': (17, 26, 1.0), 'leste_1': (18, 28, 0.6), 'leste_2': (17, 28, 1.6),
     'sul_1': (17, 26, 1.4), 'sul_2': (16, 25, 3.2), 'litoral_norte': (20, 28, 4.0),
     'litoral_baixada': (20, 27, 5.5), 'litoral_sul': (19, 26, 7.8),
+    'vale_oeste': (17, 28, 2.0), 'vale_leste': (16, 27, 3.0),
+    'mantiqueira': (10, 20, 4.0), 'vale_historico': (16, 27, 2.0),
 }
 
 

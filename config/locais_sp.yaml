@@ -5,7 +5,7 @@ meta:
   city: 'São Paulo'
   state: 'SP'
   timezone: 'America/Sao_Paulo'
-  coverage: 'São Paulo capital (8 setores) e litoral paulista (Litoral Norte, Baixada Santista e Litoral Sul)'
+  coverage: 'São Paulo capital (8 setores) e litoral paulista (Litoral Norte, Baixada Santista e Litoral Sul), Vale do Paraíba, Mantiqueira e Vale Histórico'
   note: 'Coordenadas aproximadas de pontos representativos; validar com base cartográfica oficial antes de alegar precisão distrital.'
   official_subprefeituras_reference: 'https://prefeitura.sp.gov.br/subprefeitura'
   official_litoral_reference: 'https://semil.sp.gov.br/sma/gerco/'
@@ -80,6 +80,36 @@ sectors:
     short: 'Litoral S.'
     subprefeituras: []
     context: ['Ilha Comprida', 'Iguape', 'Cananeia']
+
+  vale_oeste:
+    group: 'vale_oeste'
+    label: 'Vale do Paraíba Oeste'
+    short: 'Vale Oeste'
+    subprefeituras: []
+    context: ["São José dos Campos","Jacareí","Caçapava"]
+    daily_anchor: true
+
+  vale_leste:
+    group: 'vale_leste'
+    label: 'Vale do Paraíba Leste'
+    short: 'Vale Leste'
+    subprefeituras: []
+    context: ["Taubaté","Pindamonhangaba","Aparecida","Guaratinguetá","Lorena","Cachoeira Paulista","Cruzeiro"]
+
+  mantiqueira:
+    group: 'mantiqueira'
+    label: 'Serra da Mantiqueira'
+    short: 'Mantiqueira'
+    subprefeituras: []
+    context: ["Campos do Jordão","Santo Antônio do Pinhal","São Bento do Sapucaí","Monteiro Lobato"]
+    daily_anchor: true
+
+  vale_historico:
+    group: 'vale_historico'
+    label: 'Vale Histórico e Bocaina'
+    short: 'Vale Histórico'
+    subprefeituras: []
+    context: ["Bananal","Queluz","Areias","Silveiras","Arapeí","Cunha","São José do Barreiro"]
 
 # O primeiro ponto de cada setor (tier 1) é a referência editorial fixa.
 # O boletim usa UM ponto por setor, escolhido por rodízio entre tiers 1 e 2,
@@ -169,3 +199,26 @@ locations:
   - {id: bertioga, name: 'Bertioga', sector: litoral_baixada, latitude: -23.8500, longitude: -46.1400, tier: 2, spatial_fit: medio}
   - {id: mongagua, name: 'Mongaguá', sector: litoral_baixada, latitude: -24.0900, longitude: -46.6200, tier: 2, spatial_fit: medio}
   - {id: itanhaem, name: 'Itanhaém', sector: litoral_baixada, latitude: -24.1840, longitude: -46.7890, tier: 2, spatial_fit: medio}
+
+  # Interior paulista: centros municipais aproximados, não previsões por rua.
+  - {id: sao_jose_dos_campos, name: 'São José dos Campos', sector: vale_oeste, latitude: -23.1896, longitude: -45.8841, tier: 1, spatial_fit: medio}
+  - {id: jacarei, name: 'Jacareí', sector: vale_oeste, latitude: -23.3053, longitude: -45.9658, tier: 2, spatial_fit: medio}
+  - {id: cacapava, name: 'Caçapava', sector: vale_oeste, latitude: -23.1008, longitude: -45.7066, tier: 2, spatial_fit: medio}
+  - {id: taubate, name: 'Taubaté', sector: vale_leste, latitude: -23.0264, longitude: -45.5553, tier: 1, spatial_fit: medio}
+  - {id: pindamonhangaba, name: 'Pindamonhangaba', sector: vale_leste, latitude: -22.9239, longitude: -45.4617, tier: 2, spatial_fit: medio}
+  - {id: aparecida, name: 'Aparecida', sector: vale_leste, latitude: -22.846, longitude: -45.233, tier: 2, spatial_fit: medio}
+  - {id: guaratingueta, name: 'Guaratinguetá', sector: vale_leste, latitude: -22.816, longitude: -45.193, tier: 2, spatial_fit: medio}
+  - {id: lorena, name: 'Lorena', sector: vale_leste, latitude: -22.731, longitude: -45.124, tier: 2, spatial_fit: medio}
+  - {id: cachoeira_paulista, name: 'Cachoeira Paulista', sector: vale_leste, latitude: -22.665, longitude: -45.009, tier: 2, spatial_fit: medio}
+  - {id: cruzeiro, name: 'Cruzeiro', sector: vale_leste, latitude: -22.576, longitude: -44.963, tier: 2, spatial_fit: medio}
+  - {id: campos_do_jordao, name: 'Campos do Jordão', sector: mantiqueira, latitude: -22.739, longitude: -45.591, tier: 1, spatial_fit: medio}
+  - {id: santo_antonio_do_pinhal, name: 'Santo Antônio do Pinhal', sector: mantiqueira, latitude: -22.827, longitude: -45.663, tier: 2, spatial_fit: medio}
+  - {id: sao_bento_do_sapucai, name: 'São Bento do Sapucaí', sector: mantiqueira, latitude: -22.689, longitude: -45.731, tier: 2, spatial_fit: medio}
+  - {id: monteiro_lobato, name: 'Monteiro Lobato', sector: mantiqueira, latitude: -22.956, longitude: -45.84, tier: 2, spatial_fit: medio}
+  - {id: bananal, name: 'Bananal', sector: vale_historico, latitude: -22.683, longitude: -44.324, tier: 1, spatial_fit: medio}
+  - {id: queluz, name: 'Queluz', sector: vale_historico, latitude: -22.537, longitude: -44.778, tier: 2, spatial_fit: medio}
+  - {id: areias, name: 'Areias', sector: vale_historico, latitude: -22.578, longitude: -44.699, tier: 2, spatial_fit: medio}
+  - {id: silveiras, name: 'Silveiras', sector: vale_historico, latitude: -22.663, longitude: -44.852, tier: 2, spatial_fit: medio}
+  - {id: arapei, name: 'Arapeí', sector: vale_historico, latitude: -22.673, longitude: -44.444, tier: 2, spatial_fit: medio}
+  - {id: cunha, name: 'Cunha', sector: vale_historico, latitude: -23.075, longitude: -44.96, tier: 2, spatial_fit: medio}
+  - {id: sao_jose_do_barreiro, name: 'São José do Barreiro', sector: vale_historico, latitude: -22.642, longitude: -44.578, tier: 2, spatial_fit: medio}

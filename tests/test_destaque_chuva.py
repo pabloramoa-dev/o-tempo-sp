@@ -8,7 +8,8 @@ from src.otemposp.geo import locations, sectors
 
 def brief(volumes, quando="amanhã"):
     pontos = locations(1)
-    assert len(volumes) == len(pontos) == 11
+    volumes = list(volumes) + [0] * (len(pontos) - len(volumes))
+    assert len(volumes) == len(pontos) == 15
     cards = [dict(point=p["name"], sector=p["sector"], short=sectors()[p["sector"]]["short"],
                   min_c=17.5, max_c=28.8, rain_pct=None, rain_mm=valor)
              for p,valor in zip(pontos,volumes)]
@@ -28,7 +29,7 @@ def test_only_highest_rain_closes_video(pauta):
     assert len([b for b in beats if b["tipo"] == "cta"]) == 1
     assert beats[-1]["fala"].startswith("Manda pra quem mora em Tatuapé")
     assert data == prev
-    assert len(cities) == 11
+    assert len(cities) == 15
 
 @pytest.mark.parametrize("pauta", [pauta_producao,pauta_live])
 @pytest.mark.parametrize("quando",["hoje","amanhã"])
@@ -36,8 +37,8 @@ def test_dry_forecast_closes_with_zero_mm_in_voice_and_screen(pauta, quando):
     beats, _ = pauta(brief([0]*11,quando))
     assert beats[-1]["tipo"] == "cta"
     assert beats[-2]["tipo"] == "gancho"
-    assert beats[-2]["fala"] == f"Nos onze locais acompanhados, não há chuva prevista {quando}."
-    assert beats[-2]["dados"] == {"numero":"0 mm","sub":"SEM CHUVA PREVISTA","local":"11 LOCAIS MONITORADOS"}
+    assert beats[-2]["fala"] == f"Nos quinze locais acompanhados, não há chuva prevista {quando}."
+    assert beats[-2]["dados"] == {"numero":"0 mm","sub":"SEM CHUVA PREVISTA","local":"15 LOCAIS MONITORADOS"}
     assert not any("milímetros" in b["fala"] for b in beats)
 
 @pytest.mark.parametrize("pauta", [pauta_producao,pauta_live])

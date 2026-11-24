@@ -42,7 +42,7 @@ def test_alinha_setores_sem_somar_horas_diferentes(monkeypatch):
             return Response(make_payload(day, start_hour))
     monkeypatch.setattr(met_forecast.requests, "Session", Session)
     snap = met_forecast.collect(0)
-    assert len(snap["points"]) == 11
+    assert len(snap["points"]) == 15
     assert {p["start_hour"] for p in snap["points"]} == {6}
     assert all(p["min_c"] == 16.0 and p["max_c"] == 33.0 for p in snap["points"])
     assert all(p["rain_mm"] == 18.0 for p in snap["points"])

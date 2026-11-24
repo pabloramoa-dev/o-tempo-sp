@@ -13,17 +13,21 @@ REGIOES = [
     ("norte", "Zona Norte"), ("centro", "Centro"),
     ("oeste", "Zona Oeste"), ("leste", "Zona Leste"),
     ("sul", "Zona Sul"), ("litoral", "Litoral Paulista"),
+    ("vale_oeste", "Vale do Paraíba Oeste"),
+    ("vale_leste", "Vale do Paraíba Leste"),
+    ("mantiqueira", "Serra da Mantiqueira"),
+    ("vale_historico", "Vale Histórico e Bocaina"),
 ]
 
 def numero_extenso(n):
-    return {8: "oito", 11: "onze"}.get(n, str(n))
+    return {8: "oito", 11: "onze", 15: "quinze"}.get(n, str(n))
 
 def pauta(brief):
     from src.otemposp.geo import sectors
     cards = brief["cards"]
     conf = sectors()
     if len(cards) != len(conf) or {c.get("sector") for c in cards} != set(conf):
-        raise ValueError("Boletim incompleto: uma cidade de cada setor da capital e do litoral é obrigatória")
+        raise ValueError("Boletim incompleto: uma cidade de cada setor da capital, litoral e interior é obrigatória")
     cities = [dict(nome=c["point"], setor=c["short"], regiao=conf[c["sector"]]["group"],
                    min=graus_inteiros(c["min_c"]), max=graus_inteiros(c["max_c"]),
                    prob_chuva=c.get("rain_pct"), chuva_mm=c.get("rain_mm")) for c in cards]

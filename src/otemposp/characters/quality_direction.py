@@ -50,8 +50,9 @@ def verificar(pacote, probe):
                 erros.append("Convite de compartilhamento não está no encerramento")
             if sum(b.get("tipo") == "cta" for b in batidas) != 1:
                 erros.append("Reel deve ter um único CTA")
-        if len(pacote.get("cidades", [])) != 11:
-            erros.append("Reel deve apresentar as onze localidades verificadas")
+        from ..geo import sectors
+        if len(pacote.get("cidades", [])) != len(sectors()):
+            erros.append("Reel deve apresentar todas as localidades verificadas")
 
     for i, b in enumerate(batidas):
         if not str(b.get("fala", "")).strip():

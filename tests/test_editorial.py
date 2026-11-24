@@ -21,7 +21,7 @@ def met_fixture():
 
 def test_11_cartoes_capital_e_litoral_e_fonte():
     b=summarise(fixture())
-    assert len(b['cards'])==11
+    assert len(b['cards'])==15
     assert 'SIMULADO' in b['caption']
     assert '@otemposp' not in b['script']
 
@@ -32,7 +32,7 @@ def test_met_usa_milimetros_e_credita_fonte():
     assert ' mm' in b['caption'] and '%' not in b['caption']
     assert 'milímetros' not in b['script']
     assert 'graus' in b['script']
-    assert b['wettest']['rain_mm'] == 5.0
+    assert b['wettest']['rain_mm'] == 7.0
 
 def test_met_sem_chuva():
     snap = met_fixture()
