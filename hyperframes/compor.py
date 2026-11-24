@@ -591,7 +591,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   <div class="cover-title">PREVISÃO<br>DO TEMPO<br>SÃO PAULO</div>
   <div class="cover-day">{esc(dia_capa)} · {d}/{m}</div>
   <div class="cover-temps"><span>MÍN <strong>{minima_capa}°</strong></span><span>MÁX <strong>{maxima_capa}°</strong></span></div>
-  <div class="cover-footer">8 REGIÕES · @OTEMPOSP</div>
+  <div class="cover-footer">CAPITAL · LITORAL · INTERIOR · @OTEMPOSP</div>
  </div>
 
  <div id="hud" class="clip" data-start="0" data-duration="{dur}" data-track-index="2">

@@ -9,7 +9,8 @@ from src.otemposp.temperatura import (
 
 def brief_com_faixas(pares):
     pontos=locations(1)
-    assert len(pares)==len(pontos)==11
+    pares = list(pares) + [(17,28)] * (len(pontos) - len(pares))
+    assert len(pares)==len(pontos)==15
     cards=[dict(point=p["name"],sector=p["sector"],short=sectors()[p["sector"]]["short"],
                 min_c=float(a),max_c=float(b),rain_pct=None,rain_mm=0)
            for p,(a,b) in zip(pontos,pares)]
@@ -31,14 +32,14 @@ def test_six_regions_spoken_separately_with_all_eleven_visible(pauta):
     old=deepcopy(data["cards"])
     beats,cities=pauta(data)
     chunks=resumos(beats)
-    assert len(chunks)==6
+    assert len(chunks)==10
     titles=[b["dados"]["titulo"] for b in chunks]
-    assert titles==["ZONA NORTE","CENTRO","ZONA OESTE","ZONA LESTE","ZONA SUL","LITORAL PAULISTA"]
-    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
+    assert titles==["ZONA NORTE","CENTRO","ZONA OESTE","ZONA LESTE","ZONA SUL","LITORAL PAULISTA","VALE DO PARAÍBA OESTE","VALE DO PARAÍBA LESTE","SERRA DA MANTIQUEIRA","VALE HISTÓRICO E BOCAINA"]
+    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3,1,1,1,1]
     assert chunks[0]["fala"]=="Zona Norte: Santana, 28 graus."
     assert chunks[1]["fala"].startswith("Centro: Sé, ")
-    assert chunks[-1]["fala"].startswith("Litoral Paulista: ")
-    assert len(linhas(beats))==len(cities)==11
+    assert chunks[5]["fala"].startswith("Litoral Paulista: ")
+    assert len(linhas(beats))==len(cities)==15
     assert {x["nome"] for x in linhas(beats)}=={x["point"] for x in old}
     assert data["cards"]==old
 
@@ -46,8 +47,8 @@ def test_six_regions_spoken_separately_with_all_eleven_visible(pauta):
 def test_even_same_temperatures_never_merge_different_regions(pauta):
     beats,cities=pauta(brief_com_faixas([(17,28)]*11))
     chunks=resumos(beats)
-    assert len(chunks)==6 and len(cities)==11
-    assert sum(len(x["dados"]["cidades"]) for x in chunks)==11
+    assert len(chunks)==10 and len(cities)==15
+    assert sum(len(x["dados"]["cidades"]) for x in chunks)==15
     assert all("28 graus" in x["fala"] for x in chunks)
     assert "Santana" in chunks[0]["fala"] and "Pirituba" not in chunks[0]["fala"]
     assert "Tatuapé" in chunks[3]["fala"]
@@ -58,7 +59,7 @@ def test_different_temperatures_remain_individual_in_each_region(pauta):
     pares=[(10+i,20+i) for i in range(11)]
     beats,_=pauta(brief_com_faixas(pares))
     chunks=resumos(beats)
-    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3]
+    assert [len(b["dados"]["cidades"]) for b in chunks]==[2,1,1,2,2,3,1,1,1,1]
     assert chunks[0]["fala"].count("graus")==1
     assert chunks[-1]["fala"].count("graus")==1
 

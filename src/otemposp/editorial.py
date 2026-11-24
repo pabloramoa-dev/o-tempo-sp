@@ -17,7 +17,7 @@ def summarise(snapshot: dict, when: str = 'hoje') -> dict:
     for p in pts:
         anchors.setdefault(p['sector'], p)
     if set(anchors) != set(sectors()) or len(pts) != len(sectors()):
-        raise ValueError('É obrigatória previsão de cada setor da capital e do litoral')
+        raise ValueError('É obrigatória previsão de cada setor da capital, do litoral e do interior')
     cards = []
     for key, sector in sectors().items():
         p = anchors[key]
@@ -38,7 +38,7 @@ def summarise(snapshot: dict, when: str = 'hoje') -> dict:
         f'Entre os pontos acompanhados, a maior máxima prevista é em {hottest["point"]}, '
         f'com {graus_inteiros(hottest["max_c"])} graus. '
         f'A menor mínima aparece em {coldest["point"]}, com {graus_inteiros(coldest["min_c"])} graus. '
-        'Confira todas as regiões da capital e do litoral na tela e compartilhe. '
+        'Confira todas as regiões da capital, do litoral e do interior na tela e compartilhe. '
         'A previsão é estimativa por ponto, não previsão por rua.'
     )
     script = opening + ' ' + commentary

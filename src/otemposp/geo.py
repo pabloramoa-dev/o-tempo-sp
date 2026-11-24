@@ -10,7 +10,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-GRUPOS = ('norte', 'centro', 'oeste', 'leste', 'sul', 'litoral')
+GRUPOS = ('norte', 'centro', 'oeste', 'leste', 'sul', 'litoral', 'vale_oeste', 'vale_leste', 'mantiqueira', 'vale_historico')
 
 @lru_cache(maxsize=1)
 def config() -> dict:
@@ -44,9 +44,17 @@ def daily_locations(published_on: date, when: str = 'hoje') -> list[dict]:
         options = [p for p in locations(2) if p['sector'] == key]
         if len(options) < 3:
             raise ValueError(f'Faltam opções para rodízio no setor {key}')
-        index = (published_on.toordinal() + shift + position * 3) % len(options)
-        chosen.append(dict(options[index]))
-    if len(chosen) != 11 or len({p['sector'] for p in chosen}) != 11:
+        if sectors()[key].get('daily_anchor'):
+            # A âncora aparece uma vez por dia; o outro turno roda os demais municípios.
+            anchor = next(p for p in options if p['tier'] == 1)
+            others = [p for p in options if p['tier'] != 1]
+            is_anchor = (published_on.toordinal() % 2 == 0) == (when == 'hoje')
+            point = anchor if is_anchor else others[(published_on.toordinal() + position) % len(others)]
+        else:
+            index = (published_on.toordinal() + shift + position * 3) % len(options)
+            point = options[index]
+        chosen.append(dict(point))
+    if len(chosen) != len(sectors()) or {p['sector'] for p in chosen} != set(sectors()):
         raise ValueError('Rodízio sem cobertura integral de capital e litoral')
     return chosen
 
@@ -54,13 +62,13 @@ def daily_locations(published_on: date, when: str = 'hoje') -> list[dict]:
 def validate() -> None:
     c = config()
     setores = c['sectors']
-    capital = [s for s in setores.values() if s['group'] != 'litoral']
+    capital = [s for s in setores.values() if s['group'] in ('norte', 'centro', 'oeste', 'leste', 'sul')]
     litoral = [s for s in setores.values() if s['group'] == 'litoral']
-    assert len(capital) == 8 and len(litoral) == 3, 'esperados 8 setores da capital e 3 do litoral'
+    assert len(capital) == 8 and len(litoral) == 3 and len(setores) == 15, 'esperados 8 setores da capital e 3 do litoral'
     assert {s['group'] for s in setores.values()} == set(GRUPOS), 'região ausente'
     subpref = [name.casefold() for s in capital for name in s['subprefeituras']]
     assert len(subpref) == 32 and len(set(subpref)) == 32, '32 subprefeituras únicas obrigatórias'
-    assert all(not s['subprefeituras'] for s in litoral), 'litoral não possui subprefeitura da capital'
+    assert all(not s['subprefeituras'] for s in setores.values() if s not in capital), 'litoral não possui subprefeitura da capital'
     pts = c['locations']
     assert len({x['id'] for x in pts}) == len(pts), 'IDs de locais duplicados'
     assert len({x['name'].casefold() for x in pts}) == len(pts), 'Nomes de locais duplicados'
@@ -73,6 +81,8 @@ def validate() -> None:
         lat, lon = float(p['latitude']), float(p['longitude'])
         if setores[p['sector']]['group'] == 'litoral':
             assert -25.5 < lat < -23.0 and -48.4 < lon < -44.0, f'coordenada costeira suspeita: {p}'
+        elif setores[p['sector']]['group'] in ('vale_oeste', 'vale_leste', 'mantiqueira', 'vale_historico'):
+            assert -23.6 < lat < -22.3 and -46.2 < lon < -44.0, f'coordenada interior suspeita: {p}'
         else:
             assert -24.0 < lat < -23.3 and -47.0 < lon < -46.2, f'coordenada da capital suspeita: {p}'
 

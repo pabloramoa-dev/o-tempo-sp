@@ -3,12 +3,12 @@ from src.otemposp.geo import validate, locations, sectors, GRUPOS
 
 def test_capital_mais_tres_areas_litoraneas():
     validate()
-    assert len(sectors()) == 11
+    assert len(sectors()) == 15
     assert sum(len(s['subprefeituras']) for s in sectors().values()) == 32
-    assert sum(s['group'] != 'litoral' for s in sectors().values()) == 8
+    assert sum(s['group'] in ('norte','centro','oeste','leste','sul') for s in sectors().values()) == 8
     assert sum(s['group'] == 'litoral' for s in sectors().values()) == 3
-    assert len(locations(1)) == 11
-    assert len(locations(2)) == 73
+    assert len(locations(1)) == 15
+    assert len(locations(2)) == 94
     assert set(p['sector'] for p in locations(1)) == set(sectors())
     assert {s['group'] for s in sectors().values()} == set(GRUPOS)
 
@@ -21,3 +21,6 @@ def test_ancoras_do_litoral_continuam_cadastradas():
 def test_parelheiros_e_cantareira_tier2():
     ids = {x['id'] for x in locations(2)}
     assert {'parelheiros','tremembe','marsilac','perus'} <= ids
+
+def test_novas_cidades():
+    assert {'São José dos Campos', 'Campos do Jordão', 'Bananal', 'Cruzeiro'} <= {p['name'] for p in locations(2)}

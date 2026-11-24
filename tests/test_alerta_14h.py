@@ -8,8 +8,8 @@ TZ=ZoneInfo("America/Sao_Paulo")
 
 class Alertas14h(unittest.TestCase):
     def test_cobertura_regional(self):
-        self.assertEqual(len(CONFIG["cidades"]),10)
-        self.assertEqual(len({r[0] for r in CONFIG["cidades"]}),10)
+        self.assertEqual(len(CONFIG["cidades"]),30)
+        self.assertEqual(len({r[0] for r in CONFIG["cidades"]}),30)
 
     def test_chuva_e_rajadas(self):
         t=datetime(2026,11,20,15,tzinfo=TZ)

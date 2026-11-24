@@ -27,14 +27,17 @@ def test_rodizio_em_31_dias_cobre_todos_os_setores_sem_repetir_dia_anterior():
         evening = daily_locations(day, "amanhã")
         assert morning == daily_locations(day, "hoje")
         assert evening == daily_locations(day, "amanhã")
-        assert len(morning) == len(evening) == len(sectors()) == 11
+        assert len(morning) == len(evening) == len(sectors()) == 15
         m, e = _ids(morning), _ids(evening)
         assert set(m) == set(e) == set(sectors())
         assert all(m[k] != e[k] for k in sectors()), "Bira e Bia com a mesma localidade"
+        for k in ("vale_oeste", "mantiqueira"):
+            anchor = next(p["id"] for p in locations(1) if p["sector"] == k)
+            assert anchor in (m[k], e[k])
         if previous_morning:
             assert all(m[k] != previous_morning[k] for k in sectors())
             assert all(e[k] != previous_evening[k] for k in sectors())
-            assert all(m[k] != previous_day_evening[k] for k in sectors())
+            assert all(m[k] != previous_day_evening[k] for k in sectors() if not sectors()[k].get("daily_anchor"))
         previous_morning, previous_evening = m, e
         previous_day_evening = e
         for key in sectors():
@@ -62,7 +65,7 @@ def test_todos_os_seis_grupos_incluidos_em_ambos_os_turnos():
     for when in ("hoje", "amanhã"):
         chosen = daily_locations(date(2026, 11, 9), when)
         grupos = {sectors()[p["sector"]]["group"] for p in chosen}
-        assert grupos == {"norte", "centro", "oeste", "leste", "sul", "litoral"}
+        assert grupos == {"norte", "centro", "oeste", "leste", "sul", "litoral", "vale_oeste", "vale_leste", "mantiqueira", "vale_historico"}
         assert sum(sectors()[p["sector"]]["group"] == "litoral" for p in chosen) == 3
 
 
@@ -104,7 +107,7 @@ def test_coleta_do_pipeline_usa_os_bairros_escolhidos_para_a_data(monkeypatch):
         chosen = daily_locations(local_today, when)
         assert [p["id"] for p in snap["points"]] == [p["id"] for p in chosen]
         assert [p["name"] for p in snap["points"]] == [p["name"] for p in chosen]
-        assert len(snap["points"]) == 11
+        assert len(snap["points"]) == 15
         assert all(p["rain_mm"] >= 0 for p in snap["points"])
 
 
@@ -114,7 +117,7 @@ def test_distribuicao_equilibrada_no_catalogo_ampliado():
 
     pool = {key: {p["id"] for p in locations(2) if p["sector"] == key}
             for key in sectors()}
-    capital = [k for k in sectors() if sectors()[k]["group"] != "litoral"]
+    capital = [k for k in sectors() if sectors()[k]["group"] in ("norte","centro","oeste","leste","sul")]
     assert all(len(pool[k]) >= 7 for k in capital)
     assert len(pool["litoral_norte"]) >= 4
     assert len(pool["litoral_baixada"]) >= 8
@@ -131,11 +134,15 @@ def test_distribuicao_equilibrada_no_catalogo_ampliado():
                 assert atual in pool[key]
                 # Nunca repetir localidade enquanto há outras disponíveis
                 # nas últimas até cinco edições do mesmo horário.
+                if sectors()[key].get("daily_anchor"):
+                    continue
                 janela = min(5, len(pool[key]) - 1)
                 assert atual not in ultimos[key][-janela:], (turno, key, i)
                 ultimos[key].append(atual)
                 frequencia[key][atual] += 1
         for key in sectors():
+            if sectors()[key].get("daily_anchor"):
+                continue
             assert set(frequencia[key]) == pool[key], (turno, key)
             valores = list(frequencia[key].values())
             assert max(valores) - min(valores) <= 1, (turno, key)
