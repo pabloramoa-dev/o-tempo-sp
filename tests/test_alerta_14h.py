@@ -89,4 +89,27 @@ class Alertas14h(unittest.TestCase):
                  "fim": (agora-timedelta(minutes=1)).isoformat()}
         self.assertIsNone(aviso_oficial_prioritario([aviso], agora))
 
+    def test_abertura_plantao_sem_contador_numerico(self):
+        from unittest.mock import patch
+        from tools.alerta_14h_roteiro import batidas, ROTULOS
+        from hyperframes.compor import cena_alerta
+        for tipo, rotulo in ROTULOS.items():
+            with self.subTest(tipo=tipo):
+                rel = {"eventos": [{"tipo": tipo, "local": "São Paulo"}],
+                       "canal": "@otemposp"}
+                falas = ["Atenção, São Paulo!", "Risco previsto.", "Orientações.", "Compartilhe."]
+                with patch("tools.alerta_14h_roteiro.montar", return_value=(falas, "")):
+                    beats = batidas(rel)
+                abertura = beats[0]
+                self.assertEqual(abertura["tipo"], "alerta")
+                self.assertEqual(abertura["fala"], falas[0])
+                self.assertEqual(abertura["dados"]["detalhe"], rotulo.upper())
+                self.assertNotIn("numero", abertura["dados"])
+                html = cena_alerta({"dur": 20}, {"id": "s0-alerta", "batidas": [0]}, beats)
+                self.assertIn("ALERTA DO TEMPO", html)
+                self.assertIn(rotulo.upper(), html)
+                self.assertNotIn("nu-dig", html)
+                self.assertNotIn("data-alvo", html)
+                self.assertNotIn("0!", html)
+
 if __name__=="__main__": unittest.main()

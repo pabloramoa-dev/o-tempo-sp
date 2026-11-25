@@ -64,8 +64,9 @@ def rel_date(rel):
 def batidas(rel):
     textos, _=montar(rel)
     return [
-      {"tipo":"gancho","fala":textos[0],"legenda":textos[0],
-       "dados":{"numero":"!","sub":"ALERTA DO TEMPO","titulo":"PLANTÃO"}},
+      {"tipo":"alerta","fala":textos[0],"legenda":textos[0],
+       "dados":{"titulo":"ALERTA DO TEMPO",
+                "detalhe":ROTULOS[rel["eventos"][0]["tipo"]].upper()}},
       {"tipo":"alerta","fala":textos[1],"legenda":textos[1],
        "dados":{"titulo":"PREVISÃO DE RISCO","detalhe":rel["eventos"][0]["local"]}},
       {"tipo":"frase","fala":textos[2],"legenda":textos[2],"dados":{}},
