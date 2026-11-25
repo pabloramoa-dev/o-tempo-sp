@@ -46,12 +46,12 @@ def gancho_rotativo(locs, data, quando, *, ancora=None, canal=""):
     slot = pub.toordinal() * 2 + int(noite) + fase
     c = ancora if ancora in validos else validos[(slot // 2 + int(noite)) % len(validos)]
     n = nome(c)
-    mx = round(valor(c, "max_c", "max"))
+    mx = graus_inteiros(valor(c, "max_c", "max"))
     mn0 = valor(c, "min_c", "min")
-    mn = round(mn0) if mn0 is not None else None
+    mn = graus_inteiros(mn0) if mn0 is not None else None
     outros = [x for x in validos if nome(x) != n]
     outro = max(outros, key=lambda x: abs(valor(x, "max_c", "max") - mx), default=None)
-    dif = round(valor(outro, "max_c", "max")) if outro else mx
+    dif = graus_inteiros(valor(outro, "max_c", "max")) if outro else mx
     fato = f"{n}: {mx} graus {quando}."
     faixa = f"{n}: de {mn} a {mx} graus {quando}." if mn is not None else fato
     # 12 famílias: identificação, curiosidade, antecipação, contraste,
