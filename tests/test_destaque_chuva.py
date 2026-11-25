@@ -2,7 +2,7 @@
 import copy
 import pytest
 from scripts.live import pauta as pauta_live
-from scripts.produce import pauta as pauta_producao
+from scripts.produce import pauta as pauta_producao, engajamento_rotativo
 from src.otemposp.chuva import maior_chuva
 from src.otemposp.geo import locations, sectors
 
@@ -27,7 +27,8 @@ def test_only_highest_rain_closes_video(pauta):
     assert beats[-2]["dados"]["local"] == "Tatuapé"
     assert beats[-1]["tipo"] == "cta"
     assert len([b for b in beats if b["tipo"] == "cta"]) == 1
-    assert beats[-1]["fala"].startswith("Manda pra quem mora em Tatuapé")
+    assert beats[-1]["fala"] == engajamento_rotativo(data.get("date"), data["when"], "Tatuapé", "sp")
+    assert "Tatuapé" in beats[-1]["dados"]["sub"]
     assert data == prev
     assert len(cities) == 15
 
