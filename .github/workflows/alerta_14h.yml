@@ -1,7 +1,7 @@
-name: Alerta severo diário — 11h20 BRT
+name: Alerta severo diário — 10h00 BRT
 on:
   schedule:
-    - cron: '20 14 * * *'
+    - cron: '0 13 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -61,7 +61,7 @@ jobs:
           if p.exists():
               r=json.loads(p.read_text())
               with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
-                  print('## Alerta 11h —',r['local'],file=f)
+                  print('## Alerta 10h —',r['local'],file=f)
                   print('Publicar:',r['publicar'],file=f)
                   print('Origem:',r['modo'],file=f)
                   print('Evento:',r['eventos'][:1],file=f)
