@@ -77,15 +77,12 @@ def roteiro_dupla(brief):
     def beat(tipo, fala, **dados):
         return dict(tipo=tipo, fala=fala, legenda=fala, dados=dados)
 
-    bat = [beat('nenhum', f'{saud}, São Paulo! Bora ver o tempo {periodo}, {NOME[outro]}?')]
-    falante = [lider]
+    # A previsão entra na primeira fala; sem saudação antes do gancho.
+    bat = []
+    falante = []
     for k, b in enumerate(batidas):
-        b = dict(b)
-        if k == 0:
-            b['fala'] = f'Bora, {NOME[lider]}! ' + b['fala']
-            b['legenda'] = f'Bora, {NOME[lider]}! ' + b['legenda']
-        bat.append(b)
-        falante.append(outro if k % 2 == 0 else lider)
+        bat.append(dict(b))
+        falante.append(lider if k % 2 == 0 else outro)
     falante[-1] = lider                    # o CTA fica com quem apresenta
     ate = 'a tarde' if when == 'hoje' else 'amanhã'
     bat.append(beat('cta', f'{saud}, e até {ate}!'))
