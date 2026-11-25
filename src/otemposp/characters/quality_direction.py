@@ -34,10 +34,10 @@ def verificar(pacote, probe):
     if not pacote.get("demo") and not pacote.get("especial_eventos"):
         dupla = pacote.get("dupla")
         if dupla:
-            # Formato em dupla: saudação curta, o gancho logo na 2ª fala, o CTA
+            # Formato em dupla: o gancho na primeira fala, o CTA
             # com quem apresenta e a despedida de quem acompanha no fim.
-            if len(batidas) < 2 or batidas[1].get("tipo") != "gancho":
-                erros.append("Dupla sem gancho meteorológico logo após a saudação")
+            if not batidas or batidas[0].get("tipo") != "gancho":
+                erros.append("Dupla sem gancho meteorológico na primeira fala")
             ctas = [i for i, b in enumerate(batidas) if b.get("tipo") == "cta"]
             if ctas != [len(batidas) - 2, len(batidas) - 1]:
                 erros.append("Dupla deve terminar com o CTA e a despedida")
