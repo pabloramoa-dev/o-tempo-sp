@@ -133,6 +133,21 @@ def pauta(brief):
                   gancho_rotativo(cards, brief.get("date"), when, ancora=hot, canal="sp"),
                   numero=f"{graus_inteiros(hot['max_c'])}°",
                   sub="MAIOR MÁXIMA", local=hot["point"])]
+    # Alerta de acumulado diário tem prioridade absoluta sobre temperatura.
+    from math import isfinite
+    fortes = sorted((c for c in cards if isinstance(c.get("rain_mm"), (int, float))
+                     and not isinstance(c["rain_mm"], bool) and isfinite(c["rain_mm"])
+                     and c["rain_mm"] >= 50), key=lambda c: -c["rain_mm"])
+    if fortes:
+        pico = fortes[0]
+        nomes = ", ".join(c["point"] for c in fortes[:3])
+        if len(fortes) > 3:
+            nomes += " e outras localidades"
+        mm = f'{pico["rain_mm"]:g}'.replace(".", ",")
+        fala = (f"Se você mora em {nomes}, preste atenção! Grande volume de chuva previsto "
+                f"{when}: até {mm} milímetros em 24 horas, com risco de alagamentos.")
+        beats[0] = beat("gancho", fala, numero=f"{mm} mm",
+                        sub="GRANDE VOLUME DE CHUVA · 24H", local=pico["point"])
     for chave, titulo in REGIOES:
         locais = [c for c in cities if c["regiao"] == chave]
         if not locais:
