@@ -57,6 +57,26 @@ def normalizar_horario_para_voz(texto: str) -> str:
         minuto = int(minuto)
         return f"{hora} {unidade} e {minuto} {'minuto' if minuto == 1 else 'minutos'}"
 
+    # Datas em português antes da síntese; não alterar a legenda original.
+    meses = ("janeiro", "fevereiro", "março", "abril", "maio", "junho",
+             "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")
+
+    def trocar_data(match):
+        dia = int(match.group("dia"))
+        mes = int(match.group("mes"))
+        ano = match.group("ano")
+        if dia > (31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[mes - 1]:
+            return match.group(0)
+        falada = f"{'primeiro' if dia == 1 else dia} de {meses[mes - 1]}"
+        if ano:
+            falada += f" de {int(ano) + (2000 if len(ano) == 2 else 0)}"
+        return falada
+
+    texto = re.sub(
+        r"(?<![\w/.,-])(?P<dia>0?[1-9]|[12]\d|3[01])/"
+        r"(?P<mes>0?[1-9]|1[0-2])(?:/(?P<ano>\d{4}|\d{2}))?"
+        r"(?![\w/]|[.,]\d)", trocar_data, texto
+    )
     return _HORA_TTS_RE.sub(trocar, texto)
 
 
