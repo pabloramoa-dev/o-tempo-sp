@@ -1,0 +1,61 @@
+name: Publicar edição extraordinária do radar
+
+# Recebe do previsao-modelo (Radar de Ocorrências) uma edição já renderizada,
+# com o vídeo num Release público de lá, e publica neste perfil.
+# Duas travas: o radar só pede publicação com modo=publicacao, e AQUI só publica
+# de verdade com a variável do repositório RADAR_PUBLICAR = true. Fora disso,
+# apenas confere a conta e a legenda (dry-run). Não mexe nos Reels diários.
+
+on:
+  repository_dispatch:
+    types: [radar_edicao]
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: "URL do REEL.mp4 no Release do previsao-modelo"
+        required: true
+      legenda_b64:
+        description: "Legenda em base64"
+        required: true
+      capa_url:
+        description: "URL da capa (opcional)"
+        default: ""
+      publicar:
+        description: "Publicar de verdade?"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: radar-publicacao
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VIDEO_URL: ${{ github.event.client_payload.video_url || inputs.video_url }}
+      CAPA_URL: ${{ github.event.client_payload.capa_url || inputs.capa_url }}
+      LEGENDA_B64: ${{ github.event.client_payload.legenda_b64 || inputs.legenda_b64 }}
+      HANDLE: otemposp
+      # publica só se o radar mandou publicar (modo=publicacao) E este canal liberou (RADAR_PUBLICAR=true)
+      PUBLICAR: ${{ (github.event_name == 'repository_dispatch' && github.event.client_payload.publicar == 'sim' && vars.RADAR_PUBLICAR == 'true') || (github.event_name == 'workflow_dispatch' && inputs.publicar) }}
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Publicador do radar (previsao-modelo, público)
+        run: git clone -q --depth 1 https://github.com/pabloramoa-dev/previsao-modelo.git /tmp/modelo
+      - name: Publicar
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+        run: |
+          printf '%s' "$LEGENDA_B64" | base64 -d > /tmp/LEGENDA.txt
+          EXTRA=""; [ "$PUBLICAR" = "true" ] && EXTRA="--publicar"
+          python /tmp/modelo/scripts/rede/radar/publicar.py --video-url "$VIDEO_URL" \
+            --legenda /tmp/LEGENDA.txt --handle "$HANDLE" ${CAPA_URL:+--capa-url "$CAPA_URL"} $EXTRA \
+            | tee -a "$GITHUB_STEP_SUMMARY"
