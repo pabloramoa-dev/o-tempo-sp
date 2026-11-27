@@ -32,3 +32,17 @@ normalizar_horario_para_voz = _ESCOPO["normalizar_horario_para_voz"]
 ])
 def test_horario_falado(entrada, esperado):
     assert normalizar_horario_para_voz(entrada) == esperado
+
+
+@pytest.mark.parametrize("entrada, esperado", [
+    ("Alerta até 27/11.", "Alerta até 27 de novembro."),
+    ("De 27/11 a 28/11.", "De 27 de novembro a 28 de novembro."),
+    ("Até 01/12 às 17H.", "Até primeiro de dezembro às 17 horas."),
+    ("Válido em 27/11/2026.", "Válido em 27 de novembro de 2026."),
+    ("Válido em 27/11/26.", "Válido em 27 de novembro de 2026."),
+    ("Até 31/12 e 01/01.", "Até 31 de dezembro e primeiro de janeiro."),
+    ("Ventos de 40 km/h.", "Ventos de 40 km/h."),
+    ("Data inválida 31/02.", "Data inválida 31/02."),
+])
+def test_data_falada(entrada, esperado):
+    assert normalizar_horario_para_voz(entrada) == esperado
