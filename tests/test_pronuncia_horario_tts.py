@@ -27,7 +27,7 @@ normalizar_horario_para_voz = _ESCOPO["normalizar_horario_para_voz"]
     ("Às 18:05, atualização.", "Às 18 horas e 5 minutos, atualização."),
     ("À 1H começa o plantão.", "À 1 hora começa o plantão."),
     ("Hoje às 17 h, no Rio.", "Hoje às 17 horas, no Rio."),
-    ("Ventos de 40 km/h.", "Ventos de 40 km/h."),
+    ("Ventos de 40 km/h.", "Ventos de 40 quilômetros por hora."),
     ("Chuva a partir de 17 horas.", "Chuva a partir de 17 horas."),
 ])
 def test_horario_falado(entrada, esperado):
@@ -41,7 +41,7 @@ def test_horario_falado(entrada, esperado):
     ("Válido em 27/11/2026.", "Válido em 27 de novembro de 2026."),
     ("Válido em 27/11/26.", "Válido em 27 de novembro de 2026."),
     ("Até 31/12 e 01/01.", "Até 31 de dezembro e primeiro de janeiro."),
-    ("Ventos de 40 km/h.", "Ventos de 40 km/h."),
+    ("Ventos de 40 km/h.", "Ventos de 40 quilômetros por hora."),
     ("Data inválida 31/02.", "Data inválida 31/02."),
 ])
 def test_data_falada(entrada, esperado):
