@@ -26,7 +26,7 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: radar-publicacao
@@ -50,11 +50,27 @@ jobs:
         run: git clone -q --depth 1 https://github.com/pabloramoa-dev/previsao-modelo.git /tmp/modelo
       - name: Publicar
         env:
+          GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
         run: |
           printf '%s' "$LEGENDA_B64" | base64 -d > /tmp/LEGENDA.txt
+          if [[ "$PUBLICAR" == "true" ]]; then
+            dia=$(TZ=America/Sao_Paulo date +%F)
+            ref="tags/alerta-diario-${dia}"
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/$ref" --silent 2>/dev/null; then
+              echo "Alerta diário já reservado: $dia" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if ! gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/$ref" -f "sha=$GITHUB_SHA" --silent; then
+              if gh api "repos/$GITHUB_REPOSITORY/git/ref/$ref" --silent; then
+                echo "Alerta diário já reservado: $dia" >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              fi
+              exit 1
+            fi
+          fi
           EXTRA=""; [ "$PUBLICAR" = "true" ] && EXTRA="--publicar"
           python /tmp/modelo/scripts/rede/radar/publicar.py --video-url "$VIDEO_URL" \
             --legenda /tmp/LEGENDA.txt --handle "$HANDLE" ${CAPA_URL:+--capa-url "$CAPA_URL"} $EXTRA \
