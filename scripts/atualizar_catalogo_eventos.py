@@ -184,9 +184,11 @@ def main(agora: datetime | None = None) -> int:
         paginas = buscar_paginas(sabado)
     except Exception as exc:  # noqa: BLE001 - qualquer falha = sem pauta
         return registrar_motivo(ed, f"busca de eventos falhou: {exc}")
+    print(f"busca: {len(paginas)} página(s) de fontes permitidas")
     for pagina in paginas:
         try:
             candidatos = extrair(pagina, sabado)
+            print(f"  {pagina['url'][:90]} -> {len(candidatos)} candidato(s)")
         except Exception as exc:  # noqa: BLE001
             rejeitados.append({"fonte": pagina["url"], "motivo": f"extração falhou: {exc}"})
             continue
@@ -205,6 +207,8 @@ def main(agora: datetime | None = None) -> int:
                 rejeitados.append({"evento": e.get("name"), "fonte": e.get("source"), "motivo": problemas})
             elif _norm(e["name"]) not in {_norm(a["name"]) for a in aceitos}:
                 aceitos.append(e)
+    for r in rejeitados:
+        print(f"  rejeitado: {str(r.get('evento') or r.get('fonte'))[:60]} — {r.get('motivo')}")
     # Fonte oficial primeiro; depois mais sessões.
     aceitos.sort(key=lambda e: (not e.get("fonte_oficial"), -len(e["sessions"])))
     if len(aceitos) < 2:
