@@ -1,0 +1,45 @@
+name: Resgate de publicação
+
+# Confere se o turno saiu (media_id no registro deste canal), dispara só o
+# turno pendente dentro da janela segura (America/Sao_Paulo), acompanha a
+# execução e termina VERMELHO se a Meta não confirmar. Nunca publica previsão
+# vencida; a trava anti-duplicação do Reel continua valendo.
+on:
+  workflow_dispatch:
+  # Disparo externo opcional (cron-job.org): POST /dispatches {"event_type":"resgate"}.
+  repository_dispatch:
+    types: [resgate]
+  schedule:
+    - cron: '40 10 * * *'  # 07:40 America/Sao_Paulo
+    - cron: '40 11 * * *'  # 08:40 America/Sao_Paulo
+    - cron: '40 21 * * *'  # 18:40 America/Sao_Paulo
+    - cron: '40 22 * * *'  # 19:40 America/Sao_Paulo
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  resgatar:
+    if: vars.AUTOMATION_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    concurrency:
+      group: resgate-publicacao
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Escolher turno pendente, disparar e confirmar media_id
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCHEDULE_CRON: ${{ github.event.schedule }}
+          JANELA_MANHA: "06:00-09:30"
+          JANELA_NOITE: "17:50-20:30"
+          ADAPTADOR: "arquivo_por_edicao"
+          WORKFLOW_MANHA: "reels.yml"
+          WORKFLOW_NOITE: "reels.yml"
+          DISPATCH_MANHA: "turno=hoje"
+          DISPATCH_NOITE: "turno=amanhã"
+        run: python3 -m scripts.resgate_publicacao
