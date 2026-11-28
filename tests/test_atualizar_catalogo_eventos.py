@@ -83,3 +83,17 @@ def test_menos_de_dois_eventos_nao_atualiza(catalogo, monkeypatch):
 def test_catalogo_atual_nao_e_tocado(catalogo, monkeypatch):
     catalogo.write_text(json.dumps({"edition": "2026-11-27", "events": [{}, {}]}))
     assert A.main(AGORA) == 0
+
+
+def test_so_modelos_gratuitos_com_preco_zero(monkeypatch):
+    import io
+    dados = {"data": [
+        {"id": "x/pago", "pricing": {"prompt": "0.001", "completion": "0.002"}, "context_length": 100000},
+        {"id": "x/falso:free", "pricing": {"prompt": "0.1", "completion": "0"}, "context_length": 100000},
+        {"id": "x/curto:free", "pricing": {"prompt": "0", "completion": "0"}, "context_length": 4000},
+        {"id": "x/gemma-bom:free", "pricing": {"prompt": "0", "completion": "0"}, "context_length": 32000},
+        {"id": "x/qwen-bom:free", "pricing": {"prompt": "0", "completion": "0", "request": "0"}, "context_length": 32000}]}
+    monkeypatch.delenv("OPENROUTER_MODEL", raising=False)
+    monkeypatch.setattr(A, "_MODELOS", None)
+    monkeypatch.setattr(A.urllib.request, "urlopen", lambda req, timeout: io.BytesIO(json.dumps(dados).encode()))
+    assert A.modelos_gratuitos() == ["x/qwen-bom:free", "x/gemma-bom:free"]

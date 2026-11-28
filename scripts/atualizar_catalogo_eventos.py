@@ -38,7 +38,9 @@ DOMINIOS = ["prefeitura.sp.gov.br", "capital.sp.gov.br", "visitesaopaulo.com",
             "agendasp.sp.gov.br"]
 # Caixa da capital paulista (folga pequena); ponto fora = geocodificação errada.
 LAT, LON = (-24.01, -23.35), (-46.83, -46.36)
-MODELO = os.environ.get("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+# Modelo escolhido na hora entre os ':free' com preço zero (o id fixo antigo
+# sumiu do OpenRouter e dava 404). Mesma regra do Radar da rede.
+PREFERENCIA = ("qwen", "deepseek", "nemotron", "gemma", "llama", "mistral")
 UA = "o-tempo-sp/1.0 (github.com/pabloramoa-dev/o-tempo-sp)"
 
 
@@ -122,6 +124,36 @@ def buscar_paginas(sabado: date) -> list[dict]:
             for x in r.get("results", []) if x.get("url")]
 
 
+_MODELOS: list[str] | None = None
+
+
+def modelos_gratuitos() -> list[str]:
+    global _MODELOS
+    if _MODELOS is not None:
+        return _MODELOS
+    if os.environ.get("OPENROUTER_MODEL"):
+        _MODELOS = [os.environ["OPENROUTER_MODEL"]]
+        return _MODELOS
+    req = urllib.request.Request("https://openrouter.ai/api/v1/models", headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        dados = json.load(r)["data"]
+    livres = []
+    for m in dados:
+        p = m.get("pricing") or {}
+        try:
+            gratis = ("prompt" in p and "completion" in p and
+                      all(float(v or 0) == 0 for k, v in p.items() if k in ("prompt", "completion", "request")))
+        except ValueError:
+            gratis = False
+        if str(m.get("id", "")).endswith(":free") and gratis and (m.get("context_length") or 0) >= 16000:
+            livres.append(m["id"])
+
+    def nota(mid):
+        return next((i for i, pref in enumerate(PREFERENCIA) if pref in mid.casefold()), len(PREFERENCIA))
+    _MODELOS = sorted(livres, key=lambda mid: (nota(mid), mid))
+    return _MODELOS
+
+
 def extrair(pagina: dict, sabado: date) -> list[dict]:
     prompt = (
         "Extraia do texto abaixo no máximo 3 eventos presenciais na cidade de São Paulo "
@@ -129,11 +161,21 @@ def extrair(pagina: dict, sabado: date) -> list[dict]:
         "Use SOMENTE o que estiver escrito; não complete nada. Responda apenas JSON: "
         '{"eventos":[{"name":"","venue":"","priority":"","sessions":[{"starts_at":"AAAA-MM-DDTHH:MM:00-03:00","headline":""}]}]}'
         "\n\nTEXTO:\n" + pagina["texto"][:12000])
-    r = _post("https://openrouter.ai/api/v1/chat/completions", {
-        "model": MODELO, "temperature": 0, "response_format": {"type": "json_object"},
-        "messages": [{"role": "user", "content": prompt}]},
-        {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
-    conteudo = r["choices"][0]["message"]["content"]
+    ultimo = None
+    for modelo in modelos_gratuitos()[:3]:
+        assert modelo.endswith(":free"), "trava: só modelos gratuitos"
+        try:
+            r = _post("https://openrouter.ai/api/v1/chat/completions", {
+                "model": modelo, "temperature": 0, "response_format": {"type": "json_object"},
+                "reasoning": {"effort": "low", "exclude": True},
+                "messages": [{"role": "user", "content": prompt}]},
+                {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
+            conteudo = r["choices"][0]["message"]["content"] or ""
+            break
+        except Exception as exc:  # noqa: BLE001 - tenta o próximo modelo grátis
+            ultimo = exc
+    else:
+        raise RuntimeError(f"nenhum modelo gratuito respondeu: {ultimo}")
     conteudo = conteudo[conteudo.find("{"): conteudo.rfind("}") + 1]
     eventos = json.loads(conteudo).get("eventos") or []
     for e in eventos:
