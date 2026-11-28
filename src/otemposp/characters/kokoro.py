@@ -47,6 +47,14 @@ _HORA_TTS_RE = re.compile(
 
 
 def normalizar_horario_para_voz(texto: str) -> str:
+    # Expande as unidades meteorológicas só no texto enviado à voz.
+    texto = re.sub(
+        r"\b(?:de\s+)?(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?)(?=\s*(?:mm|km)\s*/\s*h\b)",
+        r"de \1 a \2", texto, flags=re.IGNORECASE,
+    )
+    texto = re.sub(r"(?<=\d)\s*mm\s*/\s*h\b", " milímetros por hora", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"(?<=\d)\s*km\s*/\s*h\b", " quilômetros por hora", texto, flags=re.IGNORECASE)
+
     """'17H'/'17h'/'17:00' -> '17 horas'; '17h30' -> '17 horas e 30 minutos'."""
     def trocar(match):
         hora = int(match.group("hora"))
