@@ -1,47 +1,47 @@
 {
-  "edition": "2026-11-20",
-  "verified_at": "2026-11-18",
+  "edition": "2026-11-27",
+  "verified_at": "2026-11-27",
+  "verificacao": "manual (pesquisa em fontes da Prefeitura de SP e imprensa que cita a Prefeitura)",
   "events": [
     {
-      "name": "Best of Blues and Rock",
-      "venue": "Plateia externa do Auditorio Ibirapuera",
-      "latitude": -23.5881,
-      "longitude": -46.6576,
-      "priority": "ingressos esgotados em 20 e 22/11; publico exato nao divulgado",
+      "name": "VI Festival Mário de Andrade — Feira do Livro",
+      "venue": "Praça Dom José Gaspar, ao lado da Biblioteca Mário de Andrade (R. da Consolação, 94), Centro",
+      "latitude": -23.5456,
+      "longitude": -46.6424,
+      "priority": "festival gratuito da Prefeitura (SMC/BMA) de 27 a 29/11; feira ao ar livre, sensível a chuva",
       "sessions": [
         {
-          "starts_at": "2026-11-20T20:00:00-03:00",
-          "headline": "Eddie Vedder"
+          "starts_at": "2026-11-28T10:00:00-03:00",
+          "headline": "Feira do Livro, das 10h às 19h"
         },
         {
-          "starts_at": "2026-11-21T20:00:00-03:00",
-          "headline": "Roger Daltrey"
-        },
-        {
-          "starts_at": "2026-11-22T20:00:00-03:00",
-          "headline": "Eddie Vedder"
+          "starts_at": "2026-11-29T10:00:00-03:00",
+          "headline": "Feira do Livro, das 10h às 19h"
         }
       ],
-      "source": "https://billboard.com.br/best-of-blues-and-rock-2026-horarios-shows/",
-      "restrictions": "Guarda-chuvas proibidos; capas de chuva permitidas"
+      "source": "https://prefeitura.sp.gov.br/web/cultura/w/bma/festival-m%C3%A1rio-de-andrade",
+      "fonte_oficial": true,
+      "restrictions": "Página oficial informa 28 e 29/11, das 10h às 19h, na Praça Dom José Gaspar"
     },
     {
-      "name": "Festival da Consciencia Negra",
-      "venue": "Palco Sao Joao, Av. Sao Joao, 747, Centro",
-      "latitude": -23.5408,
-      "longitude": -46.6412,
-      "priority": "mais de 300 atividades gratuitas em toda a cidade; publico exato nao divulgado",
+      "name": "Natal no Centro — palcos São Bento e Sé",
+      "venue": "Largo São Bento e Praça da Sé, Centro Histórico",
+      "latitude": -23.5442,
+      "longitude": -46.6339,
+      "priority": "abertura da programação gratuita de Natal da Prefeitura (SMC), palcos ao ar livre",
       "sessions": [
         {
-          "starts_at": "2026-11-20T13:00:00-03:00",
-          "headline": "Seu Jorge"
+          "starts_at": "2026-11-28T17:00:00-03:00",
+          "headline": "Mauricio Gasperini (Rádio Táxi), Palco São Bento"
         },
         {
-          "starts_at": "2026-11-21T19:00:00-03:00",
-          "headline": "Os Garotin"
+          "starts_at": "2026-11-29T18:00:00-03:00",
+          "headline": "Diego Estevam, Palco Sé"
         }
       ],
-      "source": "https://prefeitura.sp.gov.br/web/cultura/w/seu-jorge-jota.p%C3%AA-os-garotin-rachel-reis-tasha-e-tracie-e-samba-de-dandara-s%C3%A3o-destaques-do-festival-consci%C3%AAncia-negra-no-centro-de-s%C3%A3o-paulo"
+      "source": "https://www.metropoles.com/sao-paulo/prefeitura-de-sao-paulo-inaugura-programacao-de-natal-com-shows-no-centro",
+      "fonte_oficial": false,
+      "restrictions": "Programação divulgada pela SMC/Prefeitura e publicada pela imprensa em 27/11; sujeita a alteração"
     }
   ]
 }

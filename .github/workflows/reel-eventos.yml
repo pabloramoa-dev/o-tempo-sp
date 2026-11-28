@@ -36,9 +36,23 @@ jobs:
           pip install -r requirements-voice.txt pytest
           python -m compileall -q scripts src hyperframes
           python -m pytest -q
+      - name: Atualizar catálogo de eventos (só o que a fonte confirma)
+        id: catalogo
+        env:
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          set +e
+          python -m scripts.atualizar_catalogo_eventos
+          rc=$?
+          if [ "$rc" = "3" ]; then echo "seguir=nao" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "seguir=sim" >> "$GITHUB_OUTPUT"
+          exit "$rc"
       - name: Verificar evento real, consultar previsao e renderizar Bira e Bia
+        if: steps.catalogo.outputs.seguir == 'sim'
         run: python -m scripts.render_eventos
       - name: Conferir MP4
+        if: steps.catalogo.outputs.seguir == 'sim'
         run: |
           test -s output/eventos_fim_de_semana/especial-eventos-sp.mp4
           ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 output/eventos_fim_de_semana/especial-eventos-sp.mp4
@@ -51,7 +65,7 @@ jobs:
             output/eventos_fim_de_semana/*.txt
           retention-days: 7
       - name: Publicar em sexta-feira às 14h, sem duplicar
-        if: env.LIVE == 'true'
+        if: env.LIVE == 'true' && steps.catalogo.outputs.seguir == 'sim'
         env:
           GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
