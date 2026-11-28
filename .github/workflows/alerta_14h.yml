@@ -109,10 +109,24 @@ jobs:
         id: publicar
         if: steps.render.outcome == 'success' && (steps.consulta.outputs.publicar == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publicar-alertas-hoje-20-11-2026]'))))
         env:
+          GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
         run: |
+          dia=$(TZ=America/Sao_Paulo date +%F)
+          ref="tags/alerta-diario-${dia}"
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/$ref" --silent 2>/dev/null; then
+            echo "Alerta diário já reservado: $dia" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if ! gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/$ref" -f "sha=$GITHUB_SHA" --silent; then
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/$ref" --silent; then
+              echo "Alerta diário já reservado: $dia" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            exit 1
+          fi
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
             test "$(TZ=America/Sao_Paulo date +%F)" = "2026-11-20" || exit 1
           fi
