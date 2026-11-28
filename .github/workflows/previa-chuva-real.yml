@@ -40,13 +40,17 @@ jobs:
           from zoneinfo import ZoneInfo
           import json
           from pathlib import Path
+          import sys
+          sys.path.insert(0, 'src')
+          from otemposp.geo import sectors
           brief = json.loads(Path('output/brief.json').read_text())
           snapshot = json.loads(Path('output/snapshot.json').read_text())
           expected = (datetime.now(ZoneInfo('America/Sao_Paulo')).date() + timedelta(days=1)).isoformat()
           assert brief['date'] == expected, (brief['date'], expected)
           assert snapshot['is_fixture'] is False
           assert 'MET Norway' in snapshot['source']
-          assert len(brief['cards']) == 11, len(brief['cards'])
+          # Número de setores vem do cadastro (eram 11, hoje 15): run 46084129608.
+          assert len(brief['cards']) == len(sectors()), (len(brief['cards']), len(sectors()))
           assert all(isinstance(c['rain_mm'], (int,float)) for c in brief['cards'])
           assert Path('output/bia.mp4').stat().st_size > 100000
           print('Prévia real validada para', expected)
